@@ -1,67 +1,70 @@
-#!/bin/sh 
-# 
-# Setup XenStore entry for paravirtualized USB driver. 
-# 
-# Written by Noboru Iwamatsu <[hidden email]> 
-# 
+#!/bin/sh
+#
+# Setup XenStore entries for a paravirtualized driver.
+#
+# Based on the script written by Noboru Iwamatsu <[hidden email]>
+# Copyright (c) 2016 Oleksandr Andrushchenko
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-XSWRITE=/usr/bin/xenstore-write 
-XSCHMOD=/usr/bin/xenstore-chmod 
+XSWRITE=`which xenstore-write`
+XSCHMOD=`which xenstore-chmod`
 
-DEV_NAME=vusb 
-# Max 16 ports. 
-NUM_PORTS=8 
+usage () {
+	echo "Usage: `basename $0` <pvdev-name> <frontend-id> <backend-id> <device-id>"
+	echo "    <pvdev-name>: PV device name"
+	echo "    <frontend-id>: the domain id of frontend"
+	echo "    <backend-id>: the domain id of backend"
+	echo "    <device-id>: the device id of frontend (instance number)"
+	echo ""
+	echo "Example:"
+	echo "    If you use paravirtual Audio driver on Domain ID 1,"
+	echo "    simply do"
+	echo "    `basename $0` vaudio 1 0 0"
+	exit 1
+}
 
-usage () { 
-    echo "Usage: `basename $0` <frontend-id> <device-id>" 
-    echo "    <frontend-id>: the domain id of frontend" 
-    echo "    <device-id>: the device id of frontend" 
-    echo "" 
-    echo "Example:" 
-    echo "    If you use paravirtual USB driver on Domain ID 1," 
-    echo "    simply do" 
-    echo "    `basename $0` 1 0" 
-    exit 1 
-} 
+# no default parameters, if not 4 then quit
+[ $# -eq 4 ] || usage
 
-[ $# -eq 2 ] || usage 
+PVDEV_NAME=$1
+FRONTEND_ID=$2
+BACKEND_ID=$3
+DEV_ID=$4
 
-DEV_ID=$2 
+# Write backend information into the location that frontend looks for.
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/backend-id $BACKEND_ID
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/backend \
+/local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID
 
-# Write backend information into the location that frontend look for. 
-$XSWRITE /local/domain/$1/device/$DEV_NAME/$DEV_ID/backend-id 0 
-$XSWRITE /local/domain/$1/device/$DEV_NAME/$DEV_ID/backend \ 
-/local/domain/0/backend/$DEV_NAME/$1/$DEV_ID 
+# Write frontend information into the location that backend looks for.
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/frontend-id $FRONTEND_ID
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/frontend \
+/local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/dev_id $DEV_ID
 
-# Write frontend information into the location that backend look for. 
-$XSWRITE /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/frontend-id $1 
-$XSWRITE /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/frontend \ 
-/local/domain/$1/device/$DEV_NAME/$DEV_ID 
+# Set permissions
+$XSCHMOD -r /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID "b$FRONTEND_ID"
+$XSCHMOD -r /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID "b$BACKEND_ID"
+$XSCHMOD -r /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID "b$FRONTEND_ID"
+$XSCHMOD -r /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID "b$BACKEND_ID"
 
-# Write virtual root hub field. 
-$XSWRITE /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/num-ports $NUM_PORTS 
-for i in $(seq 1 $NUM_PORTS) 
-do 
-        # Set all port to disconnected state 
-        $XSWRITE /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/port-$i "0" 
-done 
+# Set state to XenbusStateInitialising
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/state 1
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/state 1
 
-# Set permission 
-$XSCHMOD /local/domain/$1/device/$DEV_NAME/$DEV_ID n$1 r0 
-$XSCHMOD /local/domain/$1/device/$DEV_NAME/$DEV_ID/backend-id n$1 r0 
-$XSCHMOD /local/domain/$1/device/$DEV_NAME/$DEV_ID/backend n$1 r0 
-$XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID n0 r$1 
-$XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/frontend-id n0 r$1 
-$XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/frontend n0 r$1 
-$XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/num-ports n0 r$1 
-for i in $(seq 1 $NUM_PORTS) 
-do 
-        $XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/port-$i n0 r$1 
-done 
-
-# Set state to XenbusStateInitialising 
-$XSWRITE /local/domain/$1/device/$DEV_NAME/$DEV_ID/state 1 
-$XSCHMOD /local/domain/$1/device/$DEV_NAME/$DEV_ID/state n$1 r0 
-$XSWRITE /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/state 1 
-$XSCHMOD /local/domain/0/backend/$DEV_NAME/$1/$DEV_ID/state n0 r$1 
+# FIXME: now start
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/reconnect/$DEV_ID/frontend-id $FRONTEND_ID
 
