@@ -21,18 +21,26 @@
 XSWRITE=`which xenstore-write`
 
 PVDEV_NAME="vaudio"
-FRONTEND_ID=1
+FRONTEND_ID=$1
 BACKEND_ID=0
 DEV_ID=0
 
+usage () {
+        echo "Usage: `basename $0` <frontend-id>"
+        echo "    <frontend-id>: the domain id of frontend"
+        exit 1
+}
+
+# no default parameters, if not 1 then quit
+[ $# -eq 1 ] || usage
 
 # Configure PV audio generic entries
 ./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
 
-# Configure playback/capture parameters for Domain 1
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/0/type playback
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/1/type playback
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/2/type playback
+# Configure playback/capture parameters for Domain $1
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/0/stream_type playback
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/1/stream_type playback
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/2/stream_type playback
 
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/3/type capture
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/4/type capture
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/3/stream_type capture
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/4/stream_type capture
