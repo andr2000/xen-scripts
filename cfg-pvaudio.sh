@@ -31,8 +31,17 @@ usage () {
         exit 1
 }
 
-# no default parameters, if not 1 then quit
-[ $# -eq 1 ] || usage
+guess_domain () {
+	FRONTEND_ID=`xl list | grep -i "domu" | awk '{print $2}'`
+	echo "Guessing DomU to be \"$FRONTEND_ID\""
+	if [ -z "$FRONTEND_ID" ]; then
+		return 1
+	fi
+	return 0
+}
+
+# no default parameters, if not 1 then try guessing or quit
+[ $# -eq 1 ] || guess_domain || usage
 
 # Configure PV audio generic entries
 ./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
