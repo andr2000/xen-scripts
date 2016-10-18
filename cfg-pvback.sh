@@ -30,9 +30,9 @@ usage () {
 	echo "    <device-id>: the device id of frontend (instance number)"
 	echo ""
 	echo "Example:"
-	echo "    If you use paravirtual Audio driver on Domain ID 1,"
+	echo "    If you use paravirtual sound driver on Domain ID 1,"
 	echo "    simply do"
-	echo "    `basename $0` vaudio 1 0 0"
+	echo "    `basename $0` vsnd 1 0 0"
 	exit 1
 }
 
