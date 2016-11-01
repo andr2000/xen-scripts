@@ -65,6 +65,3 @@ $XSCHMOD -r /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID "
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/state 1
 $XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/state 2
 
-# FIXME: now start
-$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/reconnect/$DEV_ID/frontend-id $FRONTEND_ID
-
