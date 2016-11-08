@@ -50,6 +50,7 @@ guess_domain () {
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/short-name "Card 0 short name"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/long-name "Card 0 long name"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/sample-formats "s8;u8;s16_le;s16_be"
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/buffer-size 262144
 
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/device/0/name "General analog"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/card/0/device/0/stream/0/type "p"
