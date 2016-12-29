@@ -51,8 +51,8 @@ $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/id 1
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "960x1080"
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "1024x768"
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "1600x900"
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "800x600"
-#XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "80x60"
+#$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "800x600"
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/0/resolution "1920x1080"
 
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/1/type "HDMI-A"
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/connector/1/id 8
