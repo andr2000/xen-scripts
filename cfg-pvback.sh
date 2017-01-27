@@ -53,7 +53,6 @@ $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/backend \
 $XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/frontend-id $FRONTEND_ID
 $XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/frontend \
 /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID
-$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/dev_id $DEV_ID
 
 # Set permissions
 $XSCHMOD -r /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID "b$FRONTEND_ID"
