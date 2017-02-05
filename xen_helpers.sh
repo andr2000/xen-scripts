@@ -96,8 +96,13 @@ _xen_initialize_environment()
 	fi
 
 	# Build
-	export XEN_SETUP_ID=sysroot
-	_xen_initialize_sysroot
+	if [ "${_XEN_INIT}" == "MENUCONFIG" ] ; then
+		export XEN_SETUP_ID=config
+	else
+		export XEN_SETUP_ID=sysroot
+		_xen_initialize_sysroot
+	fi
+
 
 	# bash prompt
 	export _XEN_ORIGINAL_PS1="${_XEN_ORIGINAL_PS1:-${PS1}}"
@@ -275,16 +280,17 @@ cda_save()
 	esac
 }
 
-_xen_menuconfig()
+_xen_kernel_config()
 {
-	ARCH=arm64 make menuconfig
-	exit 0
+	_xen_initialize_environment
 }
 
-xen_kernel_menuconfig()
-{(
-	env -i TERM="xterm" PATH=${PATH} _XEN_INIT="MCONFIG" bash --rcfile $(readlink -f "${BASH_SOURCE}")
-)}
+xen_kernel_config()
+{
+	env -i TERM="xterm" PATH=${PATH} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} \
+		_XEN_INIT=MENUCONFIG XEN_SHELL_REUSE=1 \
+		bash --rcfile $(readlink -f "${BASH_SOURCE}")
+}
 
 xen_config()
 {
@@ -357,8 +363,8 @@ xen_man()
 		xen_install)
 			echo "xen_install -- install Xen"
 			;;
-		xen_kernel_menuconfig)
-			echo "xen_kernel_menuconfig -- make kernel config"
+		xen_kernel_config)
+			echo "xen_kernel_config -- run environment for kernel config"
 			;;
 		xen_helpers)
 			echo "xen_helpers"
@@ -410,6 +416,8 @@ _xen_parse_command_line "xen_helpers" "config:" "$@" || exit 1
 
 if [ "${_XEN_INIT}" == "" ] ; then
 	_xen_initialize "${arg_config}"
+elif [ "${_XEN_INIT}" == "MENUCONFIG" ] ; then
+	_xen_kernel_config
 elif [ "${_XEN_INIT}" == "ENV" ] ; then
 	_xen_initialize_environment
 elif [ "${_XEN_INIT}" == "DONE" ] ; then
