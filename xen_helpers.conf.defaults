@@ -1,0 +1,20 @@
+# If you want to modify the default behavior of xen_helpers, copy this file
+# to xen_helpers.conf and uncomment/modify the exported variables.
+
+# Shell
+
+# Shell prompt prefix.
+# export XEN_SETUP_ID=xen
+
+# Reuse the current shell environment by sourcing the helpers script. By default helpers
+# start a new shell but by setting this variable to 1 the current shell can be reused.
+# export XEN_SHELL_REUSE=0
+
+# Build
+
+# Location of SYSROOT snapshot.
+# export XEN_SYSROOT_DIR=
+
+# Number of jobs for make. It should be a number or "MAX" to let make to decide
+# the actual number.
+# export XEN_BUILD_JOBS=1
