@@ -89,6 +89,14 @@ _xen_initialize_shell()
 
 }
 
+_xen_bash_prompt()
+{
+	export _XEN_ORIGINAL_PS1="${_XEN_ORIGINAL_PS1:-${PS1}}"
+	export _XEN_SETUP_ID_PREFIX="\[\033[01;32m\][${XEN_SETUP_ID}-${XEN_SETUP_ID_EXT}"
+	export _XEN_SETUP_ID_SUFFIX="\[\033[01;32m\]]\[\033[00m\]:"
+	export PS1="${_XEN_SETUP_ID_PREFIX}${_XEN_SETUP_ID_SUFFIX}${_XEN_ORIGINAL_PS1}"
+}
+
 _xen_initialize_environment()
 {
 	if [ "${XEN_SHELL_REUSE}" != "1" ] ; then
@@ -104,11 +112,8 @@ _xen_initialize_environment()
 	fi
 
 
-	# bash prompt
-	export _XEN_ORIGINAL_PS1="${_XEN_ORIGINAL_PS1:-${PS1}}"
-	export _XEN_SETUP_ID_PREFIX="\[\033[01;32m\][${XEN_SETUP_ID}"
-	export _XEN_SETUP_ID_SUFFIX="\[\033[01;32m\]]\[\033[00m\]:"
-	export PS1="${_XEN_SETUP_ID_PREFIX}${_XEN_SETUP_ID_SUFFIX}${_XEN_ORIGINAL_PS1}"
+	# update bash prompt
+	_xen_bash_prompt
 
 	export _XEN_INIT="DONE"
 }
@@ -218,6 +223,26 @@ _xen_cd_completion()
 _xen_cda_completion()
 {
 	_xen_cd_completion "xen dom0 domu domd rootfs" ""
+}
+
+cd() {
+	builtin cd "$@" || return
+	export XEN_SETUP_ID_EXT=""
+	[ "$OLDPWD" = "$PWD" ] || case $PWD in
+		"${XEN_DIR}")
+			export XEN_SETUP_ID_EXT="xen"
+		;;
+		"${XEN_DIR_KERNEL_DOM0}")
+			export XEN_SETUP_ID_EXT="dom0"
+		;;
+		"${XEN_DIR_KERNEL_DOMU}")
+			export XEN_SETUP_ID_EXT="domu"
+		;;
+		"${XEN_DIR_ROOTFS_DOM0}")
+			export XEN_SETUP_ID_EXT="rootfs"
+		;;
+	esac
+	_xen_bash_prompt
 }
 
 cda()
