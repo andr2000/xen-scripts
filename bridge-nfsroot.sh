@@ -3,8 +3,12 @@ mount -o remount,exec /run
 R=/run/root
 IPADDR=`ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'`
 
-mkdir -p "$R/proc" "$R/usr" "$R/dev"
-cp -r /bin /lib /sbin bridge.sh "$R"
+mkdir -p "$R/proc" "$R/usr" "$R/dev" "$R/lib"
+cp -r /bin /sbin bridge.sh "$R"
+pushd .
+cd /lib
+cp -r `ls -A | grep -v "modules\|depmod\|firmware\|modprobe"` "$R/lib"
+popd
 cp -r /usr/sbin "$R/usr/sbin"
 cat > "$R/script" <<EOF
 mount -t proc none /proc
