@@ -317,14 +317,30 @@ xen_kernel_config()
 		bash --rcfile $(readlink -f "${BASH_SOURCE}")
 }
 
-xen_kernel_install()
+_xen_kernel_install()
 {
 	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make install
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make dtbs_install
+}
+
+_xen_kernel_install_modules()
+{
 	# INSTALL_MOD_STRIP=1 for stripping the modules - not really
 	# needed for NFS rootfs
 	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS_DOM0}/ make modules_install
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make dtbs_install
 }
+
+xen_kernel_install()
+{
+	_xen_kernel_install
+	_xen_kernel_install_modules
+}
+
+xen_kernel_install_no_modules()
+{
+        _xen_kernel_install
+}
+
 
 xen_config()
 {
@@ -401,9 +417,11 @@ xen_man()
 			echo "xen_kernel_config -- run environment for kernel config"
 			;;
 		xen_kernel_install)
-			echo "xen_kernel_install -- install kernel and modules"
+			echo "xen_kernel_install -- install kernel, dtbs and modules"
 			;;
-
+		xen_kernel_install_no_modules)
+			echo "xen_kernel_install -- install kernel and dtbs, NO modules"
+			;;
 		xen_helpers)
 			echo "xen_helpers"
 			echo
