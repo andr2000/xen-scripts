@@ -3,9 +3,6 @@
 
 # Shell
 
-# Shell prompt prefix.
-# export XEN_SETUP_ID=xen
-
 # Reuse the current shell environment by sourcing the helpers script. By default helpers
 # start a new shell but by setting this variable to 1 the current shell can be reused.
 # export XEN_SHELL_REUSE=0
@@ -13,8 +10,15 @@
 # Build
 
 # Location of SYSROOT snapshot.
-# export XEN_SYSROOT_DIR=
+#export XEN_SYSROOT_DIR=/home/a2k/projects/sysroots/rcar/m3/
 
 # Number of jobs for make. It should be a number or "MAX" to let make to decide
 # the actual number.
-# export XEN_BUILD_JOBS=1
+#export XEN_BUILD_JOBS=MAX
+
+# Paths used by cda, updated by cda_save
+
+# export XEN_DIR=/home/a2k/projects/andr2000/xen-troops-xen
+# export XEN_DIR_ROOTFS_DOM0=/tftpboot/dom0-rootfs
+# export XEN_DIR_KERNEL_DOM0=/home/a2k/projects/andr2000/xen-troops-linux-rcar
+# export XEN_DIR_KERNEL_DOMU=/home/a2k/projects/andr2000/xen-troops-linux

@@ -232,16 +232,16 @@ cda()
 			cd "${XEN_DIR}"
 		;;
 		dom0)
-			cd "${XEN_KERNEL_DOM0_DIR}"
+			cd "${XEN_DIR_KERNEL_DOM0}"
 		;;
 		domd)
-			cd "${XEN_KERNEL_DOMD_DIR}"
+			cd "${XEN_DIR_KERNEL_DOMD}"
 		;;
 		domu)
-			cd "${XEN_KERNEL_DOMU_DIR}"
+			cd "${XEN_DIR_KERNEL_DOMU}"
 		;;
 		rootfs)
-			cd "${XEN_ROOTFS_DOM0_DIR}"
+			cd "${XEN_DIR_ROOTFS_DOM0}"
 		;;
 		*)
 		;;
@@ -260,20 +260,20 @@ cda_save()
 			export XEN_DIR=${PWD}
 		;;
 		dom0)
-			_xen_set_config XEN_KERNEL_DOM0_DIR ${PWD}
-			export XEN_KERNEL_DOM0_DIR=${PWD}
+			_xen_set_config XEN_DIR_KERNEL_DOM0 ${PWD}
+			export XEN_DIR_KERNEL_DOM0=${PWD}
 		;;
 		domd)
-			_xen_set_config XEN_KERNEL_DOMD_DIR ${PWD}
-			export XEN_KERNEL_DOMD_DIR=${PWD}
+			_xen_set_config XEN_DIR_KERNEL_DOMD ${PWD}
+			export XEN_DIR_KERNEL_DOMD=${PWD}
 		;;
 		domu)
-			_xen_set_config XEN_KERNEL_DOMU_DIR ${PWD}
-			export XEN_KERNEL_DOMU_DIR=${PWD}
+			_xen_set_config XEN_DIR_KERNEL_DOMU ${PWD}
+			export XEN_DIR_KERNEL_DOMU=${PWD}
 		;;
 		rootfs)
-			_xen_set_config XEN_ROOTFS_DOM0_DIR ${PWD}
-			export XEN_ROOTFS_DOM0_DIR=${PWD}
+			_xen_set_config XEN_DIR_ROOTFS_DOM0 ${PWD}
+			export XEN_DIR_ROOTFS_DOM0=${PWD}
 		;;
 		*)
 		;;
@@ -347,7 +347,7 @@ xen_install()
 	_xen_save_path .
 	[[ ! -z ${XEN_DIR} ]] && cd ${XEN_DIR}
 
-	sudo -E bash -c "cp -rfv dist/* ${XEN_ROOTFS_DOM0_DIR}"
+	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
 	_xen_restore_path
 }
 
