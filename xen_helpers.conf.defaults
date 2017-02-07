@@ -20,5 +20,6 @@
 
 # export XEN_DIR=/home/a2k/projects/andr2000/xen-troops-xen
 # export XEN_DIR_ROOTFS_DOM0=/tftpboot/dom0-rootfs
+# export XEN_DIR_ROOTFS_DOMU=/tftpboot/domu-rootfs
 # export XEN_DIR_KERNEL_DOM0=/home/a2k/projects/andr2000/xen-troops-linux-rcar
 # export XEN_DIR_KERNEL_DOMU=/home/a2k/projects/andr2000/xen-troops-linux

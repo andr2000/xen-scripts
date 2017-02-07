@@ -222,7 +222,7 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu" ""
 }
 
 cd() {
@@ -239,7 +239,10 @@ cd() {
 			export XEN_SETUP_ID_EXT="domu"
 		;;
 		"${XEN_DIR_ROOTFS_DOM0}")
-			export XEN_SETUP_ID_EXT="rootfs"
+			export XEN_SETUP_ID_EXT="rootfs0"
+		;;
+		"${XEN_DIR_ROOTFS_DOMU}")
+			export XEN_SETUP_ID_EXT="rootfsu"
 		;;
 	esac
 	_xen_bash_prompt
@@ -265,8 +268,11 @@ cda()
 		domu)
 			cd "${XEN_DIR_KERNEL_DOMU}"
 		;;
-		rootfs)
+		rootfs0)
 			cd "${XEN_DIR_ROOTFS_DOM0}"
+		;;
+		rootfsu)
+			cd "${XEN_DIR_ROOTFS_DOMU}"
 		;;
 		*)
 		;;
@@ -296,9 +302,13 @@ cda_save()
 			_xen_set_config XEN_DIR_KERNEL_DOMU ${PWD}
 			export XEN_DIR_KERNEL_DOMU=${PWD}
 		;;
-		rootfs)
+		rootfs0)
 			_xen_set_config XEN_DIR_ROOTFS_DOM0 ${PWD}
 			export XEN_DIR_ROOTFS_DOM0=${PWD}
+		;;
+		rootfsu)
+			_xen_set_config XEN_DIR_ROOTFS_DOMU ${PWD}
+			export XEN_DIR_ROOTFS_DOMU=${PWD}
 		;;
 		*)
 		;;
@@ -317,17 +327,36 @@ xen_kernel_config()
 		bash --rcfile $(readlink -f "${BASH_SOURCE}")
 }
 
+_xen_select_rootfs()
+{
+	case $PWD in
+		"${XEN_DIR_KERNEL_DOM0}")
+			export XEN_DIR_ROOTFS=${XEN_DIR_ROOTFS_DOM0}
+		;;
+		"${XEN_DIR_KERNEL_DOMU}")
+			export XEN_DIR_ROOTFS=${XEN_DIR_ROOTFS_DOMU}
+		;;
+		*)
+			export XEN_DIR_ROOTFS="/tmp/"
+			echo "WARNING!!! Installing into ${XEN_DIR_ROOTFS}"
+		;;
+	esac
+
+}
+
 _xen_kernel_install()
 {
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make install
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make dtbs_install
+	_xen_select_rootfs
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS}/boot make install
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS}/boot make dtbs_install
 }
 
 _xen_kernel_install_modules()
 {
+	_xen_select_rootfs
 	# INSTALL_MOD_STRIP=1 for stripping the modules - not really
 	# needed for NFS rootfs
-	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS_DOM0}/ make modules_install
+	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ make modules_install
 }
 
 xen_kernel_install()
@@ -344,9 +373,6 @@ xen_kernel_install_no_modules()
 
 xen_config()
 {
-	_xen_save_path .
-	[[ ! -z $XEN_DIR ]] && cd ${XEN_DIR}
-
 	if [ "1" = "1" ]; then
 		echo "XSM_ENABLE := y" > .config
 		echo "CONFIG_HAS_SCIF := y" >> .config
@@ -376,29 +402,21 @@ xen_config()
 		--with-sysconfig-leaf-dir=default --with-system-qemu=/usr/bin/qemu-system-i386 \
 		--disable-qemu-traditional --enable-nls --disable-seabios --disable-sdl \
 		--enable-systemd --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
-	_xen_restore_path
 }
 
 xen_compile()
 {
-	_xen_save_path .
-	[[ ! -z ${XEN_DIR} ]] && cd ${XEN_DIR}
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=salvator CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
 	make ${SUFFIX} ${MAKE_JOBS} install
 	if [ -f dist/boot/xen ]; then
 		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
-	_xen_restore_path
 }
 
 xen_install()
 {
-	_xen_save_path .
-	[[ ! -z ${XEN_DIR} ]] && cd ${XEN_DIR}
-
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
-	_xen_restore_path
 }
 
 xen_man()
@@ -438,11 +456,12 @@ xen_man()
 			echo "  Goes to one of pre-defined locations if bookmark name is passed."
 			echo
 			echo "  Bookmarks:"
-			echo "    xen    -- Xen root"
-			echo "    dom0   -- Dom0 kernel"
-			echo "    domd   -- DomD kernel"
-			echo "    domu   -- DomU kernel"
-			echo "    rootfs -- Dom0 root filesystem"
+			echo "    xen     -- Xen root"
+			echo "    dom0    -- Dom0 kernel"
+			echo "    domd    -- DomD kernel"
+			echo "    domu    -- DomU kernel"
+			echo "    rootfs0 -- Dom0 root filesystem"
+			echo "    rootfsu -- DomU root filesystem"
 			;;
 		cda_save)
 			echo "cda_save -- save work directories paths for use with cda"
