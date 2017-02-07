@@ -346,9 +346,9 @@ _xen_select_rootfs()
 
 _xen_kernel_install()
 {
-	_xen_select_rootfs
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS}/boot make install
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS}/boot make dtbs_install
+	# always install into Dom0's root fs so these are reachable by Dom0
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make install
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make dtbs_install
 }
 
 _xen_kernel_install_modules()
