@@ -422,6 +422,14 @@ xen_compile()
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C xen || echo "$(tput setaf 1)ERRORS: build failed"
 }
 
+xen_make()
+{
+	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=salvator CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
+
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+}
+
+
 xen_install()
 {
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
@@ -438,9 +446,11 @@ xen_man()
 			echo "               Useful during development"
 			;;
 		xen_compile_all)
-			echo "xen_compile -- build Xen, the tools and install"
+			echo "xen_compile_all -- build Xen, the tools and install"
 			;;
-
+		xen_make)
+			echo "xen_make -- run make w/ parameters provided as args"
+			;;
 		xen_install)
 			echo "xen_install -- install Xen"
 			;;
