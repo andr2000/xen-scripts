@@ -405,7 +405,7 @@ xen_config()
 		--enable-systemd --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
 }
 
-xen_compile_all()
+xen_compile()
 {
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=salvator CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
@@ -413,13 +413,6 @@ xen_compile_all()
 	if [ -f dist/boot/xen ]; then
 		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
-}
-
-xen_compile()
-{
-	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=salvator CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
-
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C xen || echo "$(tput setaf 1)ERRORS: build failed"
 }
 
 xen_make()
@@ -442,11 +435,7 @@ xen_man()
 			echo "xen_config -- configure Xen build"
 			;;
 		xen_compile)
-			echo "xen_compile -- build Xen w/o tools, no install"
-			echo "               Useful during development"
-			;;
-		xen_compile_all)
-			echo "xen_compile_all -- build Xen, the tools and install"
+			echo "xen_compile -- build Xen, the tools and install"
 			;;
 		xen_make)
 			echo "xen_make -- run make w/ parameters provided as args"
