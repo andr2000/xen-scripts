@@ -354,9 +354,8 @@ _xen_kernel_install()
 _xen_kernel_install_modules()
 {
 	_xen_select_rootfs
-	# INSTALL_MOD_STRIP=1 for stripping the modules - not really
-	# needed for NFS rootfs
-	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ make modules_install
+	# INSTALL_MOD_STRIP=1 for stripping the modules
+	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ make INSTALL_MOD_STRIP=1 modules_install
 }
 
 xen_kernel_install()
