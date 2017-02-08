@@ -72,6 +72,7 @@ _xen_initialize_sysroot()
 	export XEN_COMPILE_ARCH="x86_64"
 	export XEN_TARGET_ARCH="arm64"
 	export XEN_CONFIG_EXPERT=y
+	export MAKELEVEL=0
 }
 
 _xen_initialize_shell()
@@ -347,15 +348,16 @@ _xen_select_rootfs()
 _xen_kernel_install()
 {
 	# always install into Dom0's root fs so these are reachable by Dom0
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make install
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make dtbs_install
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} install
+	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} dtbs_install
 }
 
 _xen_kernel_install_modules()
 {
 	_xen_select_rootfs
 	# INSTALL_MOD_STRIP=1 for stripping the modules
-	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ make INSTALL_MOD_STRIP=1 modules_install
+	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ V=${MAKELEVEL} make V=${MAKELEVEL} \
+		INSTALL_MOD_STRIP=1 modules_install
 }
 
 xen_kernel_install()
@@ -407,7 +409,7 @@ xen_compile()
 {
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=salvator CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
-	make ${SUFFIX} ${MAKE_JOBS} install
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install
 	if [ -f dist/boot/xen ]; then
 		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
