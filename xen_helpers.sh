@@ -22,6 +22,7 @@ _xen_load_config()
 
 	complete -o nospace -F _xen_cda_completion cda
 	complete -o nospace -F _xen_cda_completion cda_save
+	complete -o nospace -F _xen_pvr_km_completion xen_pvr_km_make
 
 	# Load defaults
 	export XEN_SHELL_REUSE=${XEN_SHELL_REUSE:-0}
@@ -223,7 +224,12 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km" ""
+}
+
+_xen_pvr_km_completion()
+{
+	_xen_cd_completion "dom0 domu domd" ""
 }
 
 cd() {
@@ -245,6 +251,10 @@ cd() {
 		"${XEN_DIR_ROOTFS_DOMU}")
 			export XEN_SETUP_ID_EXT="rootfsu"
 		;;
+		"${XEN_DIR_PVR_KM}")
+			export XEN_SETUP_ID_EXT="pvr_km"
+		;;
+
 	esac
 	_xen_bash_prompt
 }
@@ -274,6 +284,9 @@ cda()
 		;;
 		rootfsu)
 			cd "${XEN_DIR_ROOTFS_DOMU}"
+		;;
+		pvr_km)
+			cd "${XEN_DIR_PVR_KM}"
 		;;
 		*)
 		;;
@@ -311,6 +324,10 @@ cda_save()
 			_xen_set_config XEN_DIR_ROOTFS_DOMU ${PWD}
 			export XEN_DIR_ROOTFS_DOMU=${PWD}
 		;;
+		pvr_km)
+			_xen_set_config XEN_DIR_PVR_KM ${PWD}
+			export XEN_DIR_PVR_KM=${PWD}
+		;;
 		*)
 		;;
 	esac
@@ -333,6 +350,9 @@ _xen_select_rootfs()
 	case $PWD in
 		"${XEN_DIR_KERNEL_DOM0}")
 			export XEN_DIR_ROOTFS=${XEN_DIR_ROOTFS_DOM0}
+		;;
+		"${XEN_DIR_KERNEL_DOMD}")
+			export XEN_DIR_ROOTFS=${XEN_DIR_ROOTFS_DOMD}
 		;;
 		"${XEN_DIR_KERNEL_DOMU}")
 			export XEN_DIR_ROOTFS=${XEN_DIR_ROOTFS_DOMU}
@@ -371,7 +391,49 @@ xen_kernel_install_no_modules()
         _xen_kernel_install
 }
 
+_xen_pvr_km_make()
+{
+	local kernel=$1
+	shift 1
 
+	case "$kernel" in
+		dom0)
+			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOM0}
+			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOM0}
+		;;
+		domd)
+			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOMD}
+			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOMD}
+		;;
+		domu)
+			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOMU}
+			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOMU}
+		;;
+		*)
+			echo "$(tput setaf 1)ERROR: domX must be supplied as argument"
+			return 1
+		;;
+	esac
+
+	local SUFFIX="KERNELDIR=$KERNEL_DIR DISCIMAGE=$DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+}
+
+xen_pvr_km_make()
+{
+	_xen_pvr_km_make $@ || return
+
+	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL}
+}
+
+xen_pvr_km_install()
+{
+	_xen_pvr_km_make $@ || return
+
+	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install
+}
 xen_config()
 {
 	if [ "1" = "1" ]; then
@@ -440,6 +502,9 @@ xen_man()
 		xen_make)
 			echo "xen_make -- run make w/ parameters provided as args"
 			;;
+		xen_pvr_km_make)
+			echo "xen_pvr_km_make -- run make w/ parameters provided as args for PVR KM"
+			;;
 		xen_install)
 			echo "xen_install -- install Xen"
 			;;
@@ -473,7 +538,7 @@ xen_man()
 			echo "    domd    -- DomD kernel"
 			echo "    domu    -- DomU kernel"
 			echo "    rootfs0 -- Dom0 root filesystem"
-			echo "    rootfsu -- DomU root filesystem"
+			echo "    pvr_km  -- PVR KM"
 			;;
 		cda_save)
 			echo "cda_save -- save work directories paths for use with cda"
