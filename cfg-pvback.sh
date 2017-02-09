@@ -45,6 +45,9 @@ BACKEND_ID=$3
 DEV_ID=$4
 
 # Write backend information into the location that frontend looks for.
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/version 1
+$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/versions 1
+
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/backend-id $BACKEND_ID
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/backend \
 /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID
@@ -63,4 +66,3 @@ $XSCHMOD -r /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID "
 # Set state to XenbusStateInitialising
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/state 1
 $XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/state 1
-
