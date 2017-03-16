@@ -367,6 +367,11 @@ _xen_select_rootfs()
 
 _xen_kernel_install()
 {
+	if [ "$XEN_DIR_ROOTFS_DOM0" == "" ] ; then
+		echo "ERROR: Install path is $XEN_DIR_ROOTFS_DOM0"
+		return
+	fi
+
 	# always install into Dom0's root fs so these are reachable by Dom0
 	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} install
 	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} dtbs_install
@@ -375,6 +380,12 @@ _xen_kernel_install()
 _xen_kernel_install_modules()
 {
 	_xen_select_rootfs
+
+	if [ "$XEN_DIR_ROOTFS" == "" ] ; then
+		echo "ERROR: Install path is $XEN_DIR_ROOTFS"
+		return
+	fi
+
 	# INSTALL_MOD_STRIP=1 for stripping the modules
 	sudo -E PATH=$PATH INSTALL_MOD_PATH=${XEN_DIR_ROOTFS}/ V=${MAKELEVEL} make V=${MAKELEVEL} \
 		INSTALL_MOD_STRIP=1 modules_install
@@ -408,6 +419,7 @@ _xen_pvr_km_make()
 		domu)
 			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOMU}
 			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOMU}
+			export PVR_KM_DOMU=1
 		;;
 		*)
 			echo "$(tput setaf 1)ERROR: domX must be supplied as argument"
