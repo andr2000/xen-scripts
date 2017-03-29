@@ -427,7 +427,24 @@ _xen_pvr_km_make()
 		;;
 	esac
 
-	local SUFFIX="KERNELDIR=$KERNEL_DIR DISCIMAGE=$DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	case "$1" in
+		h3)
+			export PVR_FLAVOR="r8a7795_linux"
+			echo "Using r8a7795_linux"
+			shift 1
+		;;
+		m3)
+			export PVR_FLAVOR="r8a7796_linux"
+			echo "Using r8a7796_linux"
+			shift 1
+		;;
+		*)
+			echo "Using r8a7796_linux, use m3/h3 argument to change"
+			export PVR_FLAVOR="r8a7796_linux"
+		;;
+	esac
+
+	local SUFFIX="KERNELDIR=$KERNEL_DIR DISCIMAGE=$DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
 }
 
@@ -435,7 +452,7 @@ xen_pvr_km_make()
 {
 	_xen_pvr_km_make $@ || return
 
-	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL}
 }
 
@@ -443,7 +460,7 @@ xen_pvr_km_install()
 {
 	_xen_pvr_km_make $@ || return
 
-	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=r8a7796_linux"
+	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
 	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install
 }
 xen_config()
