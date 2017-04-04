@@ -74,6 +74,7 @@ _xen_initialize_sysroot()
 	export XEN_TARGET_ARCH="arm64"
 	export XEN_CONFIG_EXPERT=y
 	export MAKELEVEL=0
+	export LC_ALL=C
 }
 
 _xen_initialize_shell()
