@@ -22,7 +22,7 @@ _xen_load_config()
 
 	complete -o nospace -F _xen_cda_completion cda
 	complete -o nospace -F _xen_cda_completion cda_save
-	complete -o nospace -F _xen_pvr_km_completion xen_pvr_km_make
+	complete -o nospace -F _xen_pvr_completion xen_pvr_make
 
 	# Load defaults
 	export XEN_SHELL_REUSE=${XEN_SHELL_REUSE:-0}
@@ -224,12 +224,12 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta" ""
 }
 
-_xen_pvr_km_completion()
+_xen_pvr_completion()
 {
-	_xen_cd_completion "dom0 domu domd" ""
+	_xen_cd_completion "dom0 domu domd h3 m3" ""
 }
 
 cd() {
@@ -254,7 +254,12 @@ cd() {
 		"${XEN_DIR_PVR_KM}")
 			export XEN_SETUP_ID_EXT="pvr_km"
 		;;
-
+		"${XEN_DIR_PVR_UM}")
+			export XEN_SETUP_ID_EXT="pvr_um"
+		;;
+		"${XEN_DIR_PVR_META}")
+			export XEN_SETUP_ID_EXT="pvr_meta"
+		;;
 	esac
 	_xen_bash_prompt
 }
@@ -287,6 +292,12 @@ cda()
 		;;
 		pvr_km)
 			cd "${XEN_DIR_PVR_KM}"
+		;;
+		pvr_um)
+			cd "${XEN_DIR_PVR_UM}"
+		;;
+		pvr_meta)
+			cd "${XEN_DIR_PVR_META}"
 		;;
 		*)
 		;;
@@ -327,6 +338,14 @@ cda_save()
 		pvr_km)
 			_xen_set_config XEN_DIR_PVR_KM ${PWD}
 			export XEN_DIR_PVR_KM=${PWD}
+		;;
+		pvr_um)
+			_xen_set_config XEN_DIR_PVR_UM ${PWD}
+			export XEN_DIR_PVR_UM=${PWD}
+		;;
+		pvr_meta)
+			_xen_set_config XEN_DIR_PVR_META ${PWD}
+			export XEN_DIR_PVR_META=${PWD}
 		;;
 		*)
 		;;
@@ -402,24 +421,23 @@ xen_kernel_install_no_modules()
         _xen_kernel_install
 }
 
-_xen_pvr_km_make()
+_xen_pvr_make()
 {
 	local kernel=$1
 	shift 1
 
 	case "$kernel" in
 		dom0)
-			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOM0}
-			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOM0}
+			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOM0}
+			export PVR_DISCIMAGE=${XEN_DIR_ROOTFS_DOM0}
 		;;
 		domd)
-			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOMD}
-			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOMD}
+			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOMD}
+			export PVR_DISCIMAGE=${XEN_DIR_ROOTFS_DOMD}
 		;;
 		domu)
-			export PVR_KM_KERNEL_DIR=${XEN_DIR_KERNEL_DOMU}
-			export PVR_KM_DISCIMAGE=${XEN_DIR_ROOTFS_DOMU}
-			export PVR_KM_DOMU=1
+			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOMU}
+			export PVR_DISCIMAGE=${XEN_DIR_ROOTFS_DOMU}
 		;;
 		*)
 			echo "$(tput setaf 1)ERROR: domX must be supplied as argument"
@@ -444,23 +462,20 @@ _xen_pvr_km_make()
 		;;
 	esac
 
-	local SUFFIX="KERNELDIR=$KERNEL_DIR DISCIMAGE=$DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
+	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR METAG_INST_ROOT=$XEN_DIR_PVR_META"
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
 }
 
-xen_pvr_km_make()
+xen_pvr_make()
 {
-	_xen_pvr_km_make $@ || return
-
-	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL}
+	_xen_pvr_make $@ || return
 }
 
-xen_pvr_km_install()
+xen_pvr_install()
 {
-	_xen_pvr_km_make $@ || return
+	_xen_pvr_make $@ || return
 
-	local SUFFIX="KERNELDIR=$PVR_KM_KERNEL_DIR DISCIMAGE=$PVR_KM_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
+	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR"
 	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install
 }
 xen_config()
@@ -531,8 +546,8 @@ xen_man()
 		xen_make)
 			echo "xen_make -- run make w/ parameters provided as args"
 			;;
-		xen_pvr_km_make)
-			echo "xen_pvr_km_make -- run make w/ parameters provided as args for PVR KM"
+		xen_pvr_make)
+			echo "xen_pvr_make -- run make w/ parameters provided as args for PVR KM"
 			;;
 		xen_install)
 			echo "xen_install -- install Xen"
