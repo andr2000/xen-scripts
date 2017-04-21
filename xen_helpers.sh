@@ -109,6 +109,8 @@ _xen_initialize_environment()
 	# Build
 	if [ "${_XEN_INIT}" == "MENUCONFIG" ] ; then
 		export XEN_SETUP_ID=config
+		bind '"\e[A"':history-search-backward
+		bind '"\e[B"':history-search-forward
 	else
 		export XEN_SETUP_ID=sysroot
 		_xen_initialize_sysroot
