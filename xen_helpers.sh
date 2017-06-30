@@ -537,6 +537,11 @@ xen_install()
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
 }
 
+xen_install_boot()
+{
+	cp -vf dist/boot/* ${XEN_DIR_TFTPBOOT}
+}
+
 xen_man()
 {
 	case "$1" in
@@ -554,6 +559,9 @@ xen_man()
 			;;
 		xen_install)
 			echo "xen_install -- install Xen"
+			;;
+		xen_install_boot)
+			echo "xen_install_boot -- install boot images to TFTP dir"
 			;;
 		xen_kernel_config)
 			echo "xen_kernel_config -- run environment for kernel config"
