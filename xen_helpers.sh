@@ -537,6 +537,13 @@ xen_install()
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
 }
 
+xen_cscope()
+{
+	echo "[GEN]	cscope"
+	find . -name "*.[chS]" -type f | grep -v x86  > cscope.files
+	cscope -bq
+}
+
 xen_man()
 {
 	case "$1" in
@@ -545,6 +552,9 @@ xen_man()
 			;;
 		xen_compile)
 			echo "xen_compile -- build Xen, the tools and install"
+			;;
+		xen_cscope)
+			echo "xen_cscope -- generate cscope database for XEN"
 			;;
 		xen_make)
 			echo "xen_make -- run make w/ parameters provided as args"
