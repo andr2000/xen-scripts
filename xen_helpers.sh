@@ -227,7 +227,7 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta tftp" ""
 }
 
 _xen_pvr_completion()
@@ -262,6 +262,9 @@ cd() {
 		;;
 		"${XEN_DIR_PVR_META}")
 			export XEN_SETUP_ID_EXT="pvr_meta"
+		;;
+		"${XEN_DIR_TFTP}")
+			export XEN_SETUP_ID_EXT="tftp"
 		;;
 	esac
 	_xen_bash_prompt
@@ -301,6 +304,9 @@ cda()
 		;;
 		pvr_meta)
 			cd "${XEN_DIR_PVR_META}"
+		;;
+		tftp)
+			cd "${XEN_DIR_TFTP}"
 		;;
 		*)
 		;;
@@ -349,6 +355,10 @@ cda_save()
 		pvr_meta)
 			_xen_set_config XEN_DIR_PVR_META ${PWD}
 			export XEN_DIR_PVR_META=${PWD}
+		;;
+		tftp)
+			_xen_set_config XEN_DIR_TFTP ${PWD}
+			export XEN_DIR_TFTP=${PWD}
 		;;
 		*)
 		;;
@@ -537,6 +547,11 @@ xen_install()
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
 }
 
+xen_install_boot()
+{
+	cp -vf dist/boot/* ${XEN_DIR_TFTP}
+}
+
 xen_man()
 {
 	case "$1" in
@@ -554,6 +569,9 @@ xen_man()
 			;;
 		xen_install)
 			echo "xen_install -- install Xen"
+			;;
+		xen_install_boot)
+			echo "xen_install_boot -- install boot images to TFTP dir"
 			;;
 		xen_kernel_config)
 			echo "xen_kernel_config -- run environment for kernel config"
@@ -586,6 +604,7 @@ xen_man()
 			echo "    domu    -- DomU kernel"
 			echo "    rootfs0 -- Dom0 root filesystem"
 			echo "    pvr_km  -- PVR KM"
+			echo "    tftp    -- TFTP server root"
 			;;
 		cda_save)
 			echo "cda_save -- save work directories paths for use with cda"
