@@ -16,6 +16,7 @@
 # the actual number.
 #export XEN_BUILD_JOBS=MAX
 
+
 # Paths used by cda, updated by cda_save
 
 # export XEN_DIR=/home/a2k/projects/andr2000/xen-troops-xen
@@ -26,4 +27,4 @@
 # export XEN_DIR_PVR_KM=/home/a2k/projects/andr2000/pvr_km
 # export XEN_DIR_PVR_META=/home/a2k/projects/sysroots/rcar/meta/metag/2.8
 # export XEN_DIR_PVR_UM=/home/a2k/projects/andr2000/pvr_um
-
+# export XEN_DIR_TFTP=/srv/tftp
