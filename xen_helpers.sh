@@ -547,6 +547,13 @@ xen_install()
 	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
 }
 
+xen_cscope()
+{
+	echo "[GEN]	cscope"
+	find . -name "*.[chS]" -type f | grep -v x86  > cscope.files
+	cscope -bq
+}
+
 xen_install_boot()
 {
 	cp -vf dist/boot/* ${XEN_DIR_TFTP}
