@@ -609,7 +609,11 @@ xen_man()
 			echo "xen_make -- run make w/ parameters provided as args"
 			;;
 		xen_pvr_make)
-			echo "xen_pvr_make -- run make w/ parameters provided as args for PVR KM"
+			echo "xen_pvr_make -- run make w/ parameters provided as args for PVR KM/UM"
+			echo "  Arguments:"
+			echo "    [dom0|domu]  - domain to build for"
+			echo "    [m3|h3]      - platform to build for"
+			echo "    [guest|host] - optional, build with virtualization support"
 			;;
 		xen_install)
 			echo "xen_install -- install Xen"
