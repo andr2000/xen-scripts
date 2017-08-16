@@ -399,14 +399,29 @@ _xen_select_rootfs()
 
 _xen_kernel_install()
 {
-	if [ "$XEN_DIR_ROOTFS_DOM0" == "" ] ; then
-		echo "ERROR: Install path is $XEN_DIR_ROOTFS_DOM0"
-		return
-	fi
+	local kernel=$1
+	shift 1
 
-	# always install into Dom0's root fs so these are reachable by Dom0
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} install
-	sudo -E PATH=$PATH INSTALL_PATH=${XEN_DIR_ROOTFS_DOM0}/boot make V=${MAKELEVEL} dtbs_install
+	case "$kernel" in
+		domu)
+			# always install into Dom0's root fs so these are reachable by Dom0
+			if [ "$XEN_DIR_ROOTFS_DOM0" == "" ] ; then
+				echo "ERROR: Install path is not set: dom0 root fs"
+				return 1
+			fi
+			KERNEL_INSTALL_PATH="${XEN_DIR_ROOTFS_DOM0}/boot"
+		;;
+		*)
+			if [ "$XEN_DIR_TFTP" == "" ] ; then
+				echo "ERROR: Install path is not set: tftp"
+				return 1
+			fi
+			KERNEL_INSTALL_PATH="${XEN_DIR_TFTP}"
+		;;
+	esac
+
+	sudo -E PATH=$PATH INSTALL_PATH=${KERNEL_INSTALL_PATH} make V=${MAKELEVEL} install
+	sudo -E PATH=$PATH INSTALL_PATH=${KERNEL_INSTALL_PATH} make V=${MAKELEVEL} dtbs_install
 }
 
 _xen_kernel_install_modules()
@@ -425,13 +440,12 @@ _xen_kernel_install_modules()
 
 xen_kernel_install()
 {
-	_xen_kernel_install
-	_xen_kernel_install_modules
+	_xen_kernel_install $1 && _xen_kernel_install_modules
 }
 
 xen_kernel_install_no_modules()
 {
-        _xen_kernel_install
+        _xen_kernel_install $1
 }
 
 _xen_pvr_make()
@@ -626,9 +640,13 @@ xen_man()
 			;;
 		xen_kernel_install)
 			echo "xen_kernel_install -- install kernel, dtbs and modules"
+			echo "  Options:"
+			echo "    <domu>  - install domu kernel/modules into dom0's root fs"
 			;;
 		xen_kernel_install_no_modules)
-			echo "xen_kernel_install -- install kernel and dtbs, NO modules"
+			echo "xen_kernel_install_no_modules -- install kernel and dtbs, NO modules"
+			echo "  Options:"
+			echo "    <domu>  - install domu kernel/modules into dom0's root fs"
 			;;
 		xen_helpers)
 			echo "xen_helpers"
