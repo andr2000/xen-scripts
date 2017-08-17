@@ -409,7 +409,7 @@ _xen_kernel_install()
 				echo "ERROR: Install path is not set: dom0 root fs"
 				return 1
 			fi
-			KERNEL_INSTALL_PATH="${XEN_DIR_ROOTFS_DOM0}/boot"
+			KERNEL_INSTALL_PATH="${XEN_DIR_ROOTFS_DOM0}/boot/domu"
 		;;
 		*)
 			if [ "$XEN_DIR_TFTP" == "" ] ; then
