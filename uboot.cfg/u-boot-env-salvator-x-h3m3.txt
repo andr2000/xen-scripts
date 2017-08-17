@@ -1,0 +1,19 @@
+Salvator-X-H3/M3
+===================================
+
+setenv baudrate 115200
+setenv bootcmd run bootcmd_xen_tftp
+setenv bootcmd_xen_tftp 'run xen_load_tftp; run dtb_load_tftp; run kernel_load_tftp; run xenpolicy_load_tftp; bootm 0x48080000 - 0x48000000'
+setenv bootdelay 3
+setenv dtb_load_tftp tftp 0x48000000 dom0.dtb
+setenv ethact ravb
+setenv ethaddr 2E:09:0A:00:A0:41
+setenv fileaddr 7a000000
+setenv filesize da4e00
+setenv ipaddr 192.168.1.10
+setenv kernel_load_tftp tftp 0x7a000000 Image
+setenv serverip 192.168.1.100
+setenv xen_load_tftp tftp 0x48080000 xen-uImage
+setenv xenpolicy_load_tftp tftp 0x7c000000 xenpolicy
+setenv bootrags
+
