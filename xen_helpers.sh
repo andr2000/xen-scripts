@@ -481,6 +481,8 @@ _xen_pvr_make()
 		;;
 	esac
 
+	unset PVR_VIRT_OPS
+	local PVR_NUM_OSID="2"
 	case "$1" in
 		h3)
 			export PVR_FLAVOR="r8a7795_linux"
@@ -491,7 +493,7 @@ _xen_pvr_make()
 					echo "Using r8a7795_linux to build guest driver"
 				;;
 				host)
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=2"
+					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					echo "Using r8a7795_linux to build host driver"
 				;;
 				"")
@@ -512,7 +514,7 @@ _xen_pvr_make()
 					echo "Using r8a7796_linux to build guest driver"
 				;;
 				host)
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=2"
+					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					echo "Using r8a7796_linux to build host driver"
 				;;
 				"")
@@ -532,7 +534,6 @@ _xen_pvr_make()
 
 	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS"
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
-	unset PVR_VIRT_OPS
 }
 
 xen_pvr_make()
