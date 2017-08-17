@@ -422,6 +422,15 @@ _xen_kernel_install()
 
 	sudo -E PATH=$PATH INSTALL_PATH=${KERNEL_INSTALL_PATH} make V=${MAKELEVEL} install
 	sudo -E PATH=$PATH INSTALL_PATH=${KERNEL_INSTALL_PATH} make V=${MAKELEVEL} dtbs_install
+	# Read KERNELRELEASE from include/config/kernel.release (if it exists)
+	KERNELRELEASE=`cat include/config/kernel.release 2> /dev/null`
+	if [[ ! -z $KERNELRELEASE ]] ; then
+		pushd . > /dev/null
+		cd ${KERNEL_INSTALL_PATH}
+		sudo rm Image || true
+		sudo ln -s "vmlinuz-${KERNELRELEASE}" Image
+		popd > /dev/null
+	fi
 }
 
 _xen_kernel_install_modules()
