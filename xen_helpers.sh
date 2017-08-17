@@ -489,20 +489,19 @@ _xen_pvr_make()
 				guest)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
 					echo "Using r8a7795_linux to build guest driver"
-					shift 1
 				;;
 				host)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=2"
 					echo "Using r8a7795_linux to build host driver"
-					shift 1
 				;;
 				"")
 				;;
 				*)
-					echo "Unknown virtualization flavor ${1}, use guest/host to change"
+					echo "$(tput setaf 1)Unknown virtualization flavor ${1}, use guest/host to change"
 					return 1
 				;;
 			esac
+			shift 1
 		;;
 		m3)
 			export PVR_FLAVOR="r8a7796_linux"
@@ -511,20 +510,19 @@ _xen_pvr_make()
 				guest)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
 					echo "Using r8a7796_linux to build guest driver"
-					shift 1
 				;;
 				host)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=2"
 					echo "Using r8a7796_linux to build host driver"
-					shift 1
 				;;
 				"")
 				;;
 				*)
-					echo "Unknown virtualization flavor ${1}, use guest/host to change"
+					echo "$(tput setaf 1)Unknown virtualization flavor ${1}, use guest/host to change"
 					return 1
 				;;
 			esac
+			shift 1
 		;;
 		*)
 			echo "Using r8a7796_linux, use m3/h3 argument to change"
