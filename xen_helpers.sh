@@ -534,6 +534,7 @@ _xen_pvr_make()
 
 	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS"
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+	export PVR_ARGS_LEFT=$@
 }
 
 xen_pvr_make()
@@ -543,10 +544,11 @@ xen_pvr_make()
 
 xen_pvr_install()
 {
+	unset PVR_ARGS_LEFT
 	_xen_pvr_make $@ || return
 
 	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR $PVR_VIRT_OPS"
-	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install
+	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} ${PVR_ARGS_LEFT} install
 }
 xen_config()
 {
