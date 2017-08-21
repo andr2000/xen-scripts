@@ -489,12 +489,13 @@ _xen_pvr_make()
 			shift 1
 			case "$1" in
 				guest)
+					export PVR_FLAVOR="vzguest_linux"
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
-					echo "Using r8a7795_linux to build guest driver"
+					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
-					echo "Using r8a7795_linux to build host driver"
+					echo "Using ${PVR_FLAVOR} to build host"
 				;;
 				"")
 				;;
@@ -510,12 +511,13 @@ _xen_pvr_make()
 			shift 1
 			case "$1" in
 				guest)
+					export PVR_FLAVOR="vzguest_linux"
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
-					echo "Using r8a7796_linux to build guest driver"
+					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
 					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
-					echo "Using r8a7796_linux to build host driver"
+					echo "Using ${PVR_FLAVOR} to build host"
 				;;
 				"")
 				;;
