@@ -457,6 +457,43 @@ xen_kernel_install_no_modules()
         _xen_kernel_install $1
 }
 
+xen_kernel_install_dtbs()
+{
+	if [ "$XEN_DIR_TFTP" == "" ] ; then
+		echo "ERROR: Install path is not set: tftp dir"
+		return 1
+	fi
+
+	case "$1" in
+		h3)
+			DTB_BASE_NAME="r8a7795-salvator-x"
+		;;
+		m3)
+			DTB_BASE_NAME="r8a7796-salvator-x"
+		;;
+		*)
+			echo "Unknown board, use m3/h3 as argument to change"
+			return 1
+		;;
+	esac
+	pushd . > /dev/null
+	cda dom0
+	# Read KERNELRELEASE from include/config/kernel.release (if it exists)
+	KERNELRELEASE=`cat include/config/kernel.release 2> /dev/null`
+	if [[ ! -z $KERNELRELEASE ]] ; then
+		cd ${XEN_DIR_TFTP}
+		sudo rm dom0.dtb domu.dtb || true
+		sudo ln -s "dtbs/${KERNELRELEASE}/renesas/${DTB_BASE_NAME}-dom0.dtb" dom0.dtb
+		sudo ln -s "dtbs/${KERNELRELEASE}/renesas/${DTB_BASE_NAME}-domu.dtb" domu.dtb
+		cd ${XEN_DIR_ROOTFS_DOM0}/xen
+		sudo rm domu.dtb || true
+		sudo cp "${XEN_DIR_TFTP}/dtbs/${KERNELRELEASE}/renesas/${DTB_BASE_NAME}-domu.dtb" domu.dtb
+	else
+		echo "ERROR: cannot identify kernel release"
+	fi
+	popd > /dev/null
+}
+
 _xen_pvr_make()
 {
 	local kernel=$1
