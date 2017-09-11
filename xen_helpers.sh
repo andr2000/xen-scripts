@@ -519,7 +519,7 @@ _xen_pvr_make()
 	esac
 
 	unset PVR_VIRT_OPS
-	local PVR_NUM_OSID="2"
+	local PVR_NUM_OSID="4"
 	case "$1" in
 		h3)
 			export PVR_FLAVOR="r8a7795_linux"
