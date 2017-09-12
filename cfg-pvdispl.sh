@@ -43,9 +43,6 @@ guess_domain () {
 # no default parameters, if not 1 then try guessing or quit
 [ $# -eq 1 ] || guess_domain || usage
 
-# Configure PV generic entries
-./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
-
 #template /local/domain/<dom-id>/device/vdispl/<dev-id>/<conn-idx>
 
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/be-alloc "1"
@@ -64,4 +61,6 @@ $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/0/resolution "192
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/1/id 8
 #$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/1/resolution "960x1080"
 
+# Configure PV generic entries
+./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
 

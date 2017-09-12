@@ -20,37 +20,23 @@
 
 XSWRITE=`which xenstore-write`
 
-PVDEV_NAME="vkbd"
+PVDEV_NAME="vgsx"
 FRONTEND_ID=$1
 BACKEND_ID=0
 DEV_ID=0
+OSID=$2
 
 usage () {
-        echo "Usage: `basename $0` <frontend-id>"
+        echo "Usage: `basename $0` <frontend-id> <osid>"
         echo "    <frontend-id>: the domain id of frontend"
+        echo "    <osid>: PVR OSID of the domain"
         exit 1
 }
 
-guess_domain () {
-	FRONTEND_ID=`xl list | grep -i "info" | awk '{print $2}'`
-	echo "Guessing DomU to be \"$FRONTEND_ID\""
-	if [ -z "$FRONTEND_ID" ]; then
-		return 1
-	fi
-	return 0
-}
+# no default parameters, if not 2 then quit
+[ $# -eq 2 ] || usage
 
-# no default parameters, if not 1 then try guessing or quit
-[ $# -eq 1 ] || guess_domain || usage
-
-$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/feature-abs-pointer 1
-$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/width 2048
-$XSWRITE /local/domain/$BACKEND_ID/backend/$PVDEV_NAME/$FRONTEND_ID/$DEV_ID/height 1024
-
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/feature-multi-touch 1
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/multi-touch-width 3200
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/multi-touch-height 2047
-$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/multi-touch-num-contacts 10
+$XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/osid $OSID
 
 # Configure PV generic entries
 ./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID

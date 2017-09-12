@@ -43,9 +43,6 @@ guess_domain () {
 # no default parameters, if not 1 then try guessing or quit
 [ $# -eq 1 ] || guess_domain || usage
 
-# Configure PV sound generic entries
-./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
-
 # Configure playback/capture parameters for Domain $1
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/short-name "Card 0 short name"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/long-name "Card 0 long name"
@@ -65,3 +62,7 @@ $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/1/0/unique-id 2
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/2/name "SPDIF"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/2/0/type "p"
 $XSWRITE /local/domain/$FRONTEND_ID/device/$PVDEV_NAME/$DEV_ID/2/0/unique-id 3
+
+# Configure PV sound generic entries
+./cfg-pvback.sh $PVDEV_NAME $FRONTEND_ID $BACKEND_ID $DEV_ID
+
