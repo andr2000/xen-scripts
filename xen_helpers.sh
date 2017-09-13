@@ -589,6 +589,7 @@ xen_pvr_install()
 	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR $PVR_VIRT_OPS"
 	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} ${PVR_ARGS_LEFT} install
 }
+
 xen_config()
 {
 	if [ "1" = "1" ]; then
@@ -620,6 +621,13 @@ xen_config()
 		--with-sysconfig-leaf-dir=default --with-system-qemu=/usr/bin/qemu-system-i386 \
 		--disable-qemu-traditional --enable-nls --disable-seabios --disable-sdl \
 		--enable-systemd --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
+}
+
+xen_menuconfig()
+{
+	env -i TERM="xterm" PATH=${PATH} HOSTCC="gcc" HOSTCXX="g++" XEN_TARGET_ARCH=${ARCH} \
+		_XEN_INIT=MENUCONFIG XEN_SHELL_REUSE=1 \
+		bash --rcfile $(readlink -f "${BASH_SOURCE}")
 }
 
 xen_compile()
@@ -662,6 +670,9 @@ xen_man()
 	case "$1" in
 		xen_config)
 			echo "xen_config -- configure Xen build"
+			;;
+		xen_menuconfig)
+			echo "xen_menuconfig -- run menuconfig target for Xen (not tools)"
 			;;
 		xen_compile)
 			echo "xen_compile -- build Xen, the tools and install"
