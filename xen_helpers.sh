@@ -227,7 +227,7 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta tftp" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta tftp armtf" ""
 }
 
 _xen_pvr_completion()
@@ -265,6 +265,9 @@ cd() {
 		;;
 		"${XEN_DIR_TFTP}")
 			export XEN_SETUP_ID_EXT="tftp"
+		;;
+		"${XEN_DIR_ARMTF}")
+			export XEN_SETUP_ID_EXT="armtf"
 		;;
 	esac
 	_xen_bash_prompt
@@ -307,6 +310,9 @@ cda()
 		;;
 		tftp)
 			cd "${XEN_DIR_TFTP}"
+		;;
+		armtf)
+			cd "${XEN_DIR_ARMTF}"
 		;;
 		*)
 		;;
@@ -359,6 +365,10 @@ cda_save()
 		tftp)
 			_xen_set_config XEN_DIR_TFTP ${PWD}
 			export XEN_DIR_TFTP=${PWD}
+		;;
+		armtf)
+			_xen_set_config XEN_DIR_ARMTF ${PWD}
+			export XEN_DIR_ARMTF=${PWD}
 		;;
 		*)
 		;;
@@ -590,6 +600,70 @@ xen_pvr_install()
 	sudo -E PATH=$PATH make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} ${PVR_ARGS_LEFT} install
 }
 
+_xen_armtf_make()
+{
+	export ARMTF_DEBUG="0"
+
+	case "$1" in
+		h3)
+			export ARMTF_SOC_SPECIFIC="LSI=H3 RCAR_DRAM_SPLIT=1"
+			shift 1
+			case "$1" in
+				debug)
+					shift 1
+					export ARMTF_DEBUG="1"
+					echo "Using debug build for H3"
+				;;
+				*)
+					echo "Using release build for H3"
+				;;
+			esac
+		;;
+		m3)
+			export ARMTF_SOC_SPECIFIC="LSI=M3 RCAR_DRAM_SPLIT=2"
+			shift 1
+			case "$1" in
+				debug)
+					shift 1
+					export ARMTF_DEBUG="1"
+					echo "Using debug build for M3"
+				;;
+				*)
+					echo "Using release build for M3"
+				;;
+			esac
+		;;
+		*)
+			echo "Unknown board, use m3/h3 as argument to change"
+			return 1
+		;;
+	esac
+
+	local SUFFIX="bl2 bl31 dummytool PLAT=rcar $ARMTF_SOC_SPECIFIC RCAR_BL33_EXECUTION_EL=BL33_EL2 DEBUG=$ARMTF_DEBUG"
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+}
+
+xen_armtf_make()
+{
+	_xen_armtf_make $@ || return
+}
+
+xen_armtf_install()
+{
+	if [ "$XEN_DIR_TFTP" == "" ] ; then
+		echo "ERROR: Install path is not set: tftp dir"
+		return 1
+	fi
+
+	if [ "$1" == "debug" ] ; then
+		export ARMTF_IMG="build/rcar/debug/bl31.srec"
+	else
+		export ARMTF_IMG="build/rcar/release/bl31.srec"
+	fi
+
+	cp -vf ${ARMTF_IMG} ${XEN_DIR_TFTP}
+}
+
 xen_config()
 {
 	if [ "1" = "1" ]; then
@@ -689,6 +763,17 @@ xen_man()
 			echo "    [dom0|domu]  - domain to build for"
 			echo "    [m3|h3]      - platform to build for"
 			echo "    [guest|host] - optional, build with virtualization support"
+			;;
+		xen_atf_make)
+			echo "xen_atf_make -- run make w/ parameters provided as args for ARM TF"
+			echo "  Arguments:"
+			echo "    [m3|h3]      - mandatory, platform to build for"
+			echo "    [debug]      - optional, build in debug mode"
+			;;
+		xen_atf_install)
+			echo "xen_atf_install -- just copy bl31.srec image to TFTP dir"
+			echo "  Argument:"
+			echo "    [debug]      - optional, copy from debug dir"
 			;;
 		xen_install)
 			echo "xen_install -- install Xen"
