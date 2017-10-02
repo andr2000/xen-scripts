@@ -729,7 +729,19 @@ xen_install()
 
 xen_install_boot()
 {
+	if [ "$XEN_DIR_TFTP" == "" ] ; then
+		echo "ERROR: Install path is not set: tftp dir"
+		return 1
+	fi
+
 	cp -vf dist/boot/* ${XEN_DIR_TFTP}
+
+	pushd . > /dev/null
+	cd ${XEN_DIR_TFTP}
+	rm xenpolicy || true
+	NAME=`ls | grep xenpolicy-*`
+	ln -s "$NAME" xenpolicy
+	popd > /dev/null
 }
 
 xen_cscope()
