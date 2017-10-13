@@ -227,7 +227,7 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsu pvr_km pvr_um pvr_meta tftp armtf" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsd rootfsu pvr_km pvr_um pvr_meta tftp armtf" ""
 }
 
 _xen_pvr_completion()
@@ -245,11 +245,17 @@ cd() {
 		"${XEN_DIR_KERNEL_DOM0}")
 			export XEN_SETUP_ID_EXT="dom0"
 		;;
+		"${XEN_DIR_KERNEL_DOMD}")
+			export XEN_SETUP_ID_EXT="domd"
+		;;
 		"${XEN_DIR_KERNEL_DOMU}")
 			export XEN_SETUP_ID_EXT="domu"
 		;;
 		"${XEN_DIR_ROOTFS_DOM0}")
 			export XEN_SETUP_ID_EXT="rootfs0"
+		;;
+		"${XEN_DIR_ROOTFS_DOMD}")
+			export XEN_SETUP_ID_EXT="rootfsd"
 		;;
 		"${XEN_DIR_ROOTFS_DOMU}")
 			export XEN_SETUP_ID_EXT="rootfsu"
@@ -295,6 +301,9 @@ cda()
 		;;
 		rootfs0)
 			cd "${XEN_DIR_ROOTFS_DOM0}"
+		;;
+		rootfsd)
+			cd "${XEN_DIR_ROOTFS_DOMD}"
 		;;
 		rootfsu)
 			cd "${XEN_DIR_ROOTFS_DOMU}"
@@ -345,6 +354,10 @@ cda_save()
 		rootfs0)
 			_xen_set_config XEN_DIR_ROOTFS_DOM0 ${PWD}
 			export XEN_DIR_ROOTFS_DOM0=${PWD}
+		;;
+		rootfsd)
+			_xen_set_config XEN_DIR_ROOTFS_DOMD ${PWD}
+			export XEN_DIR_ROOTFS_DOMD=${PWD}
 		;;
 		rootfsu)
 			_xen_set_config XEN_DIR_ROOTFS_DOMU ${PWD}
