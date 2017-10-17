@@ -522,6 +522,7 @@ _xen_pvr_make()
 	local kernel=$1
 	shift 1
 
+	unset KCFLAGS
 	case "$kernel" in
 		dom0)
 			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOM0}
@@ -530,6 +531,7 @@ _xen_pvr_make()
 		domd)
 			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOMD}
 			export PVR_DISCIMAGE=${XEN_DIR_ROOTFS_DOMD}
+			export KCFLAGS="-DGPUVIRT_HOST_NOT_1_TO_1"
 		;;
 		domu)
 			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOMU}
