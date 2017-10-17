@@ -553,7 +553,7 @@ _xen_pvr_make()
 				guest)
 					shift 1
 					export PVR_FLAVOR="vzguest_linux"
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
+					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
@@ -575,7 +575,7 @@ _xen_pvr_make()
 				guest)
 					shift 1
 					export PVR_FLAVOR="vzguest_linux"
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1"
+					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
