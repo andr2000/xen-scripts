@@ -16,6 +16,8 @@
 # the actual number.
 #export XEN_BUILD_JOBS=MAX
 
+# R-Car early printk provider
+# export XEN_EARLY_PRINTK=salvator
 
 # Paths used by cda, updated by cda_save
 
