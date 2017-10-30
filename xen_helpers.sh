@@ -227,7 +227,7 @@ _xen_cd_completion()
 
 _xen_cda_completion()
 {
-	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsd rootfsu pvr_km pvr_um pvr_meta tftp armtf" ""
+	_xen_cd_completion "xen dom0 domu domd rootfs0 rootfsd rootfsu pvr_km pvr_um pvr_meta tftp armtf yocto" ""
 }
 
 _xen_pvr_completion()
@@ -275,6 +275,10 @@ cd() {
 		"${XEN_DIR_ARMTF}")
 			export XEN_SETUP_ID_EXT="armtf"
 		;;
+		"${XEN_DIR_YOCTO_ROOT}")
+			export XEN_SETUP_ID_EXT="yocto"
+		;;
+
 	esac
 	_xen_bash_prompt
 }
@@ -322,6 +326,9 @@ cda()
 		;;
 		armtf)
 			cd "${XEN_DIR_ARMTF}"
+		;;
+		yocto)
+			cd "${XEN_DIR_YOCTO_ROOT}"
 		;;
 		*)
 		;;
@@ -382,6 +389,10 @@ cda_save()
 		armtf)
 			_xen_set_config XEN_DIR_ARMTF ${PWD}
 			export XEN_DIR_ARMTF=${PWD}
+		;;
+		yocto)
+			_xen_set_config XEN_DIR_YOCTO_ROOT ${PWD}
+			export XEN_DIR_YOCTO_ROOT=${PWD}
 		;;
 		*)
 		;;
@@ -764,6 +775,47 @@ xen_cscope()
 	echo "[GEN]	cscope"
 	find . -name "*.[chS]" -type f | grep -v x86  > cscope.files
 	cscope -bq
+}
+
+_yocto_read_config_value()
+{
+	local config_file="${XEN_DIR_YOCTO_ROOT}/build/conf/local.conf"
+	local key=$1
+
+	if [ ! -f "${config_file}" ] ; then
+		echo "ERROR: Cannot open cofiguration file at ${config_file}"
+		return 1
+	fi
+
+	local exists=`grep "^[^\#]*${key}.*=" "${config_file}"`
+	if [ -z "${exists}" ] ; then
+		echo "ERROR: Value for ${key} is not set in ${config_file}"
+		return 1
+	fi
+	local value=`echo "${exists}" | sed 's/^.*=.//' | sed 's/\"//g'`
+	export "${key}=${value}"
+}
+
+xen_yocto_sync_ccache()
+{
+	unset XT_SSTATE_CACHE_MIRROR_DIR
+	unset SSTATE_DIR
+	_yocto_read_config_value SSTATE_DIR
+	_yocto_read_config_value XT_SSTATE_CACHE_MIRROR_DIR
+
+	echo "Please select a folder to sync:"
+	options=(`ls -d ${XT_SSTATE_CACHE_MIRROR_DIR}/*-ccache`)
+	select opt in "${options[@]}";
+	do
+		break;
+	done
+
+	if [ -z "${opt}" ] ; then
+		echo "ERROR: Please provide folder to sync"
+		return 1
+	fi
+	echo "Synchronising ${opt} to ${SSTATE_DIR}"
+	rsync -az --info=progress2 --stats --human-readable ${opt} ${SSTATE_DIR}
 }
 
 xen_man()
