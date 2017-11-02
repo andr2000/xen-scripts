@@ -534,6 +534,12 @@ _xen_pvr_make()
 	shift 1
 
 	unset KCFLAGS
+	local PVRVERSION_BRANCHNAME=`grep "define*.PVRVERSION_BRANCHNAME" include/pvrversion.h | awk '{ print $3 }'`
+	if [[ -z $PVRVERSION_BRANCHNAME ]] ; then
+		echo "Cannot detect PVR version"
+		return 1
+	fi
+	echo "Detected PVR version ${PVRVERSION_BRANCHNAME}"
 	case "$kernel" in
 		dom0)
 			export PVR_KERNEL_DIR=${XEN_DIR_KERNEL_DOM0}
@@ -563,13 +569,21 @@ _xen_pvr_make()
 			case "$1" in
 				guest)
 					shift 1
-					export PVR_FLAVOR="vzguest_linux"
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+					else
+						export PVR_FLAVOR="vzguest_linux"
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
 					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
 					shift 1
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+					else
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
 					echo "Using ${PVR_FLAVOR} to build host"
 				;;
 				"")
@@ -585,13 +599,21 @@ _xen_pvr_make()
 			case "$1" in
 				guest)
 					shift 1
-					export PVR_FLAVOR="vzguest_linux"
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+					else
+						export PVR_FLAVOR="vzguest_linux"
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
 					echo "Using ${PVR_FLAVOR} to build guest"
 				;;
 				host)
 					shift 1
-					export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+					else
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
 					echo "Using ${PVR_FLAVOR} to build host"
 				;;
 				"")
