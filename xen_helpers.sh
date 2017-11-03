@@ -56,7 +56,13 @@ _xen_initialize()
 
 _xen_initialize_sysroot()
 {
-	local environment="${XEN_SYSROOT_DIR}/environment-setup-aarch64-poky-linux"
+	local script_name="${XEN_SYSROOT_SCRIPT}"
+
+	if [ -z "${script_name}" ] ; then
+		script_name="environment-setup-aarch64-poky-linux"
+	fi
+
+	local environment="${XEN_SYSROOT_DIR}/${script_name}"
 
 	if [ -f "${environment}" ] ; then
 		source "${environment}"

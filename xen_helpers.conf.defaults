@@ -11,6 +11,7 @@
 
 # Location of SYSROOT snapshot.
 #export XEN_SYSROOT_DIR=/home/a2k/projects/sysroots/rcar/m3/
+#export XEN_SYSROOT_SCRIPT=environment-setup-aarch64-agl-linux
 
 # Number of jobs for make. It should be a number or "MAX" to let make to decide
 # the actual number.
