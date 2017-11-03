@@ -540,7 +540,7 @@ _xen_pvr_make()
 	shift 1
 
 	unset KCFLAGS
-	local PVRVERSION_BRANCHNAME=`grep "define*.PVRVERSION_BRANCHNAME" include/pvrversion.h | awk '{ print $3 }'`
+	local PVRVERSION_BRANCHNAME=`grep "define*.PVRVERSION_BRANCHNAME" include/pvrversion.h | awk '{ print $3 }' | sed -e 's/^"//' -e 's/"$//'`
 	if [[ -z $PVRVERSION_BRANCHNAME ]] ; then
 		echo "Cannot detect PVR version"
 		return 1
