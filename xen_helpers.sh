@@ -568,29 +568,32 @@ _xen_pvr_make()
 
 	unset PVR_VIRT_OPS
 	local PVR_NUM_OSID="2"
+	local OUT=""
 	case "$1" in
 		h3)
 			export PVR_FLAVOR="r8a7795_linux"
 			shift 1
 			case "$1" in
 				guest)
-					shift 1
 					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
 						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						OUT="binary_${PVR_FLAVOR}_$1"
 					else
 						export PVR_FLAVOR="vzguest_linux"
 						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					fi
 					echo "Using ${PVR_FLAVOR} to build guest"
+					shift 1
 				;;
 				host)
-					shift 1
 					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
 						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						OUT="binary_${PVR_FLAVOR}_$1"
 					else
 						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					fi
 					echo "Using ${PVR_FLAVOR} to build host"
+					shift 1
 				;;
 				"")
 				;;
@@ -604,23 +607,25 @@ _xen_pvr_make()
 			shift 1
 			case "$1" in
 				guest)
-					shift 1
 					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
 						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						OUT="binary_${PVR_FLAVOR}_$1"
 					else
 						export PVR_FLAVOR="vzguest_linux"
 						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					fi
 					echo "Using ${PVR_FLAVOR} to build guest"
+					shift 1
 				;;
 				host)
-					shift 1
 					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
 						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						OUT="binary_${PVR_FLAVOR}_$1"
 					else
 						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
 					fi
 					echo "Using ${PVR_FLAVOR} to build host"
+					shift 1
 				;;
 				"")
 				;;
@@ -635,7 +640,11 @@ _xen_pvr_make()
 		;;
 	esac
 
-	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS LLVM_BUILD_DIR=${PVRLLVM_BUILD_DIR}"
+	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR \
+		      METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS LLVM_BUILD_DIR=${PVRLLVM_BUILD_DIR}"
+	if [ ! -z "${OUT}" ] ; then
+		SUFFIX="$SUFFIX OUT=${OUT}"
+	fi
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
 	export PVR_ARGS_LEFT=$@
 }
