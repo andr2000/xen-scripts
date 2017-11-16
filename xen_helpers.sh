@@ -645,7 +645,13 @@ _xen_pvr_make()
 	if [ ! -z "${PVR_OUT}" ] ; then
 		SUFFIX="$SUFFIX OUT=${PVR_OUT}"
 	fi
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+	if [ ! -z "${XEN_BUILD_JOBS}" ] || [ "${XEN_BUILD_JOBS}" == "MAX" ] ; then
+		local N_CPUS=`nproc --all`
+		((N_CPUS--))
+		PVR_MAKE_JOBS="-j${N_CPUS}"
+	fi
+	echo "Using ${PVR_MAKE_JOBS} to build"
+	make ${SUFFIX} ${PVR_MAKE_JOBS} V=${MAKELEVEL} $@
 	export PVR_ARGS_LEFT=$@
 }
 
