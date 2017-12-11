@@ -758,6 +758,13 @@ xen_config()
 		#libsystemd-daemon -> libsystemd for newer systemd versions
 		sed -i 's#libsystemd-daemon#libsystemd#' tools/configure
 	fi
+
+	if [ "$1" == "thin_dom0" ] ; then
+		export SYSTEMD_STAT="disable"
+	else
+		export SYSTEMD_STAT="enable"
+	fi
+
 	./configure ${CONFIGURE_FLAGS} --prefix=/usr --exec_prefix=/usr --bindir=/usr/bin \
 		--sbindir=/usr/sbin --libexecdir=/usr/lib --datadir=/usr/share \
 		--sysconfdir=/etc --sharedstatedir=/com --localstatedir=/var \
@@ -769,7 +776,7 @@ xen_config()
 		--disable-rombios --disable-ocamltools --with-initddir=/etc/init.d \
 		--with-sysconfig-leaf-dir=default --with-system-qemu=/usr/bin/qemu-system-i386 \
 		--disable-qemu-traditional --enable-nls --disable-seabios --disable-sdl \
-		--enable-systemd --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
+		"--${SYSTEMD_STAT}-systemd" --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
 }
 
 xen_menuconfig()
@@ -872,6 +879,8 @@ xen_man()
 	case "$1" in
 		xen_config)
 			echo "xen_config -- configure Xen build"
+			echo "  Argument:"
+			echo "    [thin_dom0] - use '--disable-systemd' if present and '--enable-systemd' otherwise"
 			;;
 		xen_menuconfig)
 			echo "xen_menuconfig -- run menuconfig target for Xen (not tools)"
