@@ -897,7 +897,7 @@ xen_man()
 		xen_pvr_make)
 			echo "xen_pvr_make -- run make w/ parameters provided as args for PVR KM/UM"
 			echo "  Arguments:"
-			echo "    [dom0|domu]  - domain to build for"
+			echo "    [dom0|domd|domu]  - domain to build for"
 			echo "    [m3|h3]      - platform to build for"
 			echo "    [guest|host] - optional, build with virtualization support"
 			;;
