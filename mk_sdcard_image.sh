@@ -228,7 +228,7 @@ unpack_doma()
 
 	sudo dd if=$raw_system of=${loop_base}p${part_system} bs=1M
 	sudo dd if=$raw_vendor of=${loop_base}p${part_vendor} bs=1M
-	sudo dd if=/dev/zero of=${loop_base}p${part_misc}
+	sudo dd if=/dev/zero of=${loop_base}p${part_misc} bs=1M count=1
 
 	rm -f $raw_system $raw_vendor
 
