@@ -761,6 +761,7 @@ xen_config()
 
 	if [ "$1" == "thin_dom0" ] ; then
 		export SYSTEMD_STAT="disable"
+		shift 1
 	else
 		export SYSTEMD_STAT="enable"
 	fi
@@ -776,7 +777,8 @@ xen_config()
 		--disable-rombios --disable-ocamltools --with-initddir=/etc/init.d \
 		--with-sysconfig-leaf-dir=default --with-system-qemu=/usr/bin/qemu-system-i386 \
 		--disable-qemu-traditional --enable-nls --disable-seabios --disable-sdl \
-		"--${SYSTEMD_STAT}-systemd" --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT}
+		"--${SYSTEMD_STAT}-systemd" --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT} \
+		$@
 }
 
 xen_menuconfig()
@@ -790,7 +792,7 @@ xen_compile()
 {
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=${XEN_EARLY_PRINTK} CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install || echo "$(tput setaf 1)ERRORS: build failed"
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install $@ || echo "$(tput setaf 1)ERRORS: build failed"
 	if [ -f dist/boot/xen ]; then
 		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
