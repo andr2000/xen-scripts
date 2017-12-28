@@ -115,6 +115,8 @@ mkfs_image()
 	mkfs_image_one $loop_dev 1 boot
 	echo "Making ext4 filesystem for DomD"
 	mkfs_image_one $loop_dev 2 domd
+	echo "Making ext4 filesystem for DomF"
+	mkfs_image_one $loop_dev 3 domf
 	echo "Making ext4 filesystem for DomA/userdata"
 	mkfs_image_one $loop_dev 8 doma_user
 	sudo losetup -d $loop_dev
@@ -180,20 +182,21 @@ unpack_dom0()
 	umount_part $loop_base $part
 }
 
-unpack_domd()
+unpack_dom_from_tar()
 {
 	local db_base_folder=$1
 	local loop_base=$2
 	local img_output_file=$3
 	local part=$4
+	local domain=$5
 	local loop_dev=${loop_base}p${part}
 
-	local domd_name=`ls $db_base_folder | grep domd`
-	local domd_root=$db_base_folder/$domd_name
+	local dom_name=`ls $db_base_folder | grep $domain`
+	local dom_root=$db_base_folder/$dom_name
 	# take the latest - useful if making image from local build
-	local rootfs=`find $domd_root -name "*rootfs.tar.xz" | xargs ls -t | head -1`
+	local rootfs=`find $dom_root -name "*rootfs.tar.xz" | xargs ls -t | head -1`
 
-	echo "DomD root filesystem is at $rootfs"
+	echo "Root filesystem is at $rootfs"
 
 	mount_part $loop_base $img_output_file $part $MOUNT_POINT
 
@@ -244,7 +247,8 @@ unpack_image()
 	local img_output_file=$3
 
 	unpack_dom0 $db_base_folder $loop_dev $img_output_file 1
-	unpack_domd $db_base_folder $loop_dev $img_output_file 2
+	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 2 domd
+	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 3 fusion
 	unpack_doma $db_base_folder $loop_dev $img_output_file 5 6 7
 }
 
