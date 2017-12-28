@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 
 MOUNT_POINT="/tmp/mntpoint"
