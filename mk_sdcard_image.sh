@@ -200,7 +200,8 @@ unpack_dom_from_tar()
 
 	mount_part $loop_base $img_output_file $part $MOUNT_POINT
 
-	sudo tar -xf $rootfs -C "${MOUNT_POINT}"
+	sudo tar --extract --xz --numeric-owner --preserve-permissions --preserve-order --totals \
+		--xattrs-include='*' --directory="${MOUNT_POINT}" --file=$rootfs
 
 	umount_part $loop_base $part
 }
