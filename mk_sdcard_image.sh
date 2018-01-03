@@ -263,7 +263,7 @@ make_image()
 	local loop_dev="/dev/loop0"
 
 	echo "Preparing image at ${img_output_file}"
-	sudo umount -f ${img_output_file}*
+	sudo umount -f ${img_output_file}* || true
 	inflate_image $img_output_file $image_sg_gb
 	partition_image $img_output_file
 	mkfs_image $img_output_file $loop_dev
