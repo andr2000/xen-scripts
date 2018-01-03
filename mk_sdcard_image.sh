@@ -249,9 +249,13 @@ unpack_image()
 	local loop_dev=$2
 	local img_output_file=$3
 
+	echo "Unpacking Dom0"
 	unpack_dom0 $db_base_folder $loop_dev $img_output_file 1
+	echo "Unpacking DomD"
 	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 2 domd
+	echo "Unpacking DomF"
 	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 3 fusion
+	echo "Unpacking DomA"
 	unpack_doma $db_base_folder $loop_dev $img_output_file 5 6 7
 }
 
