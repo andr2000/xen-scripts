@@ -272,6 +272,8 @@ make_image()
 	partition_image $img_output_file
 	mkfs_image $img_output_file $loop_dev
 	unpack_image $db_base_folder $loop_dev $img_output_file
+	sync
+	echo "Done"
 }
 
 if [ "$#" -lt "2" ] ; then
