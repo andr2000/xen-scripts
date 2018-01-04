@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-
 MOUNT_POINT="/tmp/mntpoint"
+CUR_STEP=1
 
 usage()
 {
@@ -13,16 +13,32 @@ usage()
 	exit 1
 }
 
+print_step()
+{
+	local caption=$1
+	echo "###############################################################################"
+	echo "Step $CUR_STEP: $caption"
+	echo "###############################################################################"
+	((CUR_STEP++))
+}
+
+###############################################################################
+# Inflate image
+###############################################################################
 inflate_image()
 {
 	local dev=$1
 	local size_gb=$2
+
+	print_step "Inflate image"
+
 	if  [ -b "$dev" ] ; then
 		echo "Using physical block device $dev"
 		return 0
 	fi
 
 	echo "Inflating image file at $dev of size ${size_gb}GB"
+
 	local inflate=1
 	if [ -e $1 ] ; then
 		echo ""
@@ -42,8 +58,13 @@ inflate_image()
 	fi
 }
 
+###############################################################################
+# Partition image
+###############################################################################
 partition_image()
 {
+	print_step "Make partitions"
+
 	sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | sudo fdisk $1
 		o # clear the in memory partition table
 		n # new partition: Dom0 - 256M, ext4 primary
@@ -85,15 +106,9 @@ EOF
 	sudo partprobe
 }
 
-mkfs_image_one()
-{
-	local loop_base=$1
-	local part=$2
-	local label=$3
-	local loop_dev="${loop_base}p${part}"
-
-	sudo mkfs.ext4 -F $loop_dev -L $label
-}
+###############################################################################
+# Label partition
+###############################################################################
 
 label_one()
 {
@@ -105,22 +120,71 @@ label_one()
 	sudo e2label $loop_dev $label
 }
 
+###############################################################################
+# Make file system
+###############################################################################
+
+mkfs_one()
+{
+	local img_output_file=$1
+	local loop_base=$2
+	local part=$3
+	local label=$4
+	local loop_dev="${loop_base}p${part}"
+
+	print_step "Making ext4 filesystem for $label"
+
+	sudo losetup -P $loop_base $img_output_file
+	sudo mkfs.ext4 -F $loop_dev -L $label
+	sudo losetup -d $loop_base
+}
+
+mkfs_boot()
+{
+	local img_output_file=$1
+	local loop_dev=$2
+
+	mkfs_one $img_output_file $loop_dev 1 boot
+}
+
+mkfs_domd()
+{
+	local img_output_file=$1
+	local loop_dev=$2
+
+	mkfs_one $img_output_file $loop_dev 2 domd
+}
+
+mkfs_domf()
+{
+	local img_output_file=$1
+	local loop_dev=$2
+
+	mkfs_one $img_output_file $loop_dev 3 domf
+}
+
+mkfs_doma()
+{
+	local img_output_file=$1
+	local loop_dev=$2
+
+	mkfs_one $img_output_file $loop_dev 8 doma_user
+}
+
 mkfs_image()
 {
 	local img_output_file=$1
 	local loop_dev=$2
 
-	sudo losetup -P $loop_dev $img_output_file
-	echo "Making ext4 filesystem for Dom0"
-	mkfs_image_one $loop_dev 1 boot
-	echo "Making ext4 filesystem for DomD"
-	mkfs_image_one $loop_dev 2 domd
-	echo "Making ext4 filesystem for DomF"
-	mkfs_image_one $loop_dev 3 domf
-	echo "Making ext4 filesystem for DomA/userdata"
-	mkfs_image_one $loop_dev 8 doma_user
-	sudo losetup -d $loop_dev
+	mkfs_boot $img_output_file $loop_dev
+	mkfs_domd $img_output_file $loop_dev
+	mkfs_domf $img_output_file $loop_dev
+	mkfs_doma $img_output_file $loop_dev
 }
+
+###############################################################################
+# Mount partition
+###############################################################################
 
 mount_part()
 {
@@ -131,7 +195,6 @@ mount_part()
 	local loop_dev=${loop_base}p${part}
 
 	sudo losetup -P $loop_base $img_output_file
-
 	mkdir -p "${mntpoint}" || true
 	sudo mount $loop_dev "${mntpoint}"
 }
@@ -146,12 +209,43 @@ umount_part()
 	sudo losetup -d $loop_base
 }
 
-unpack_dom0()
+###############################################################################
+# Unpack domain
+###############################################################################
+
+unpack_dom_from_tar()
 {
 	local db_base_folder=$1
 	local loop_base=$2
 	local img_output_file=$3
 	local part=$4
+	local domain=$5
+	local loop_dev=${loop_base}p${part}
+
+	local dom_name=`ls $db_base_folder | grep $domain`
+	local dom_root=$db_base_folder/$dom_name
+	# take the latest - useful if making image from local build
+	local rootfs=`find $dom_root -name "*rootfs.tar.xz" | xargs ls -t | head -1`
+
+	echo "Root filesystem is at $rootfs"
+
+	mount_part $loop_base $img_output_file $part $MOUNT_POINT
+
+	sudo tar --extract --xz --numeric-owner --preserve-permissions --preserve-order --totals \
+		--xattrs-include='*' --directory="${MOUNT_POINT}" --file=$rootfs
+
+	umount_part $loop_base $part
+}
+
+unpack_dom0()
+{
+	local db_base_folder=$1
+	local loop_base=$2
+	local img_output_file=$3
+
+	local part=1
+
+	print_step "Unpacking Dom0"
 
 	local dom0_name=`ls $db_base_folder | grep dom0`
 	local dom0_root=$db_base_folder/$dom0_name
@@ -182,28 +276,26 @@ unpack_dom0()
 	umount_part $loop_base $part
 }
 
-unpack_dom_from_tar()
+unpack_domd()
 {
 	local db_base_folder=$1
-	local loop_base=$2
+	local loop_dev=$2
 	local img_output_file=$3
-	local part=$4
-	local domain=$5
-	local loop_dev=${loop_base}p${part}
 
-	local dom_name=`ls $db_base_folder | grep $domain`
-	local dom_root=$db_base_folder/$dom_name
-	# take the latest - useful if making image from local build
-	local rootfs=`find $dom_root -name "*rootfs.tar.xz" | xargs ls -t | head -1`
+	print_step  "Unpacking DomD"
 
-	echo "Root filesystem is at $rootfs"
+	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 2 domd
+}
 
-	mount_part $loop_base $img_output_file $part $MOUNT_POINT
+unpack_domf()
+{
+	local db_base_folder=$1
+	local loop_dev=$2
+	local img_output_file=$3
 
-	sudo tar --extract --xz --numeric-owner --preserve-permissions --preserve-order --totals \
-		--xattrs-include='*' --directory="${MOUNT_POINT}" --file=$rootfs
+	print_step  "Unpacking DomF"
 
-	umount_part $loop_base $part
+	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 3 fusion
 }
 
 unpack_doma()
@@ -211,11 +303,15 @@ unpack_doma()
 	local db_base_folder=$1
 	local loop_base=$2
 	local img_output_file=$3
-	local part_system=$4
-	local part_vendor=$5
-	local part_misc=$6
+
+	local part_system=5
+	local part_vendor=6
+	local part_misc=7
+
 	local raw_system="/tmp/system.raw"
 	local raw_vendor="/tmp/vendor.raw"
+
+	print_step "Unpacking DomA"
 
 	local doma_name=`ls $db_base_folder | grep android`
 	local doma_root=$db_base_folder/$doma_name
@@ -225,19 +321,20 @@ unpack_doma()
 	echo "DomA system image is at $system"
 	echo "DomA vendor image is at $vendor"
 
-	sudo losetup -P $loop_base $img_output_file
-
 	simg2img $system $raw_system
 	simg2img $vendor $raw_vendor
+
+	sudo losetup -P $loop_base $img_output_file
 
 	sudo dd if=$raw_system of=${loop_base}p${part_system} bs=1M
 	sudo dd if=$raw_vendor of=${loop_base}p${part_vendor} bs=1M
 
-	echo "Wiping out DomA/misc"
-	sudo dd if=/dev/zero of=${loop_base}p${part_misc}
+	echo "Wipe out DomA/misc"
+	sudo dd if=/dev/zero of=${loop_base}p${part_misc} || true
 
 	rm -f $raw_system $raw_vendor
 
+	echo "Put label for system partition"
 	label_one ${loop_base} ${part_system} doma_sys
 
 	sudo losetup -d $loop_base
@@ -249,15 +346,15 @@ unpack_image()
 	local loop_dev=$2
 	local img_output_file=$3
 
-	echo "Unpacking Dom0"
-	unpack_dom0 $db_base_folder $loop_dev $img_output_file 1
-	echo "Unpacking DomD"
-	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 2 domd
-	echo "Unpacking DomF"
-	unpack_dom_from_tar $db_base_folder $loop_dev $img_output_file 3 fusion
-	echo "Unpacking DomA"
-	unpack_doma $db_base_folder $loop_dev $img_output_file 5 6 7
+	unpack_dom0 $db_base_folder $loop_dev $img_output_file
+	unpack_domd $db_base_folder $loop_dev $img_output_file
+	unpack_domf $db_base_folder $loop_dev $img_output_file
+	unpack_doma $db_base_folder $loop_dev $img_output_file
 }
+
+###############################################################################
+# Common
+###############################################################################
 
 make_image()
 {
@@ -266,14 +363,18 @@ make_image()
 	local image_sg_gb=${3:-16}
 	local loop_dev="/dev/loop0"
 
-	echo "Preparing image at ${img_output_file}"
+	print_step "Preparing image at ${img_output_file}"
+
 	sudo umount -f ${img_output_file}* || true
+	sudo losetup -d $loop_dev || true
+
 	inflate_image $img_output_file $image_sg_gb
 	partition_image $img_output_file
 	mkfs_image $img_output_file $loop_dev
 	unpack_image $db_base_folder $loop_dev $img_output_file
+
 	sync
-	echo "Done"
+	print_step "Done"
 }
 
 if [ "$#" -lt "2" ] ; then
