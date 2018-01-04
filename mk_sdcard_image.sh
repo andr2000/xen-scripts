@@ -5,10 +5,11 @@ CUR_STEP=1
 
 usage()
 {
-	echo "`basename "$0"` <image-folder> <image-file> [image-size-gb]"
-	echo "	image-folder	Base daily build folder where artifacts live"
-	echo "	image-file	Output image file, can be a physical device"
-	echo "	image-size	Optional, image size in GB"
+	echo "`basename "$0"` <-p image-folder> <-d image-file> [-s image-size-gb] [-u dom0|domd|domf|doma]"
+	echo "	-p image-folder	Base daily build folder where artifacts live"
+	echo "	-d image-file	Output image file or physical device"
+	echo "	-s image-size	Optional, image size in GB"
+	echo "  -u domain	Optional, unpack the domain specified"
 
 	exit 1
 }
@@ -377,10 +378,80 @@ make_image()
 	print_step "Done"
 }
 
-if [ "$#" -lt "2" ] ; then
-    usage
+unpack_domain()
+{
+	local db_base_folder=$1
+	local img_output_file=$2
+	local domain=$3
+	local loop_dev="/dev/loop0"
+
+	print_step "Unpacking single domain: $domain"
+
+	sudo umount -f ${img_output_file}* || true
+	sudo losetup -d $loop_dev || true
+
+	case $domain in
+		dom0)
+			mkfs_boot $img_output_file $loop_dev
+			unpack_dom0 $db_base_folder $loop_dev $img_output_file
+		;;
+		domd)
+			mkfs_domd $img_output_file $loop_dev
+			unpack_domd $db_base_folder $loop_dev $img_output_file
+		;;
+		domf)
+			mkfs_domf $img_output_file $loop_dev
+			unpack_domf $db_base_folder $loop_dev $img_output_file
+		;;
+		doma)
+			mkfs_doma $img_output_file $loop_dev
+			unpack_doma $db_base_folder $loop_dev $img_output_file
+		;;
+		\?) echo "Invalid domain -$OPTARG" >&2
+		exit 1
+		;;
+	esac
+
+	sync
+	print_step "Done"
+}
+
+
+
+print_step "Parsing input parameters"
+
+while getopts ":p:d:s:u:" opt; do
+	case $opt in
+		p) ARG_DEPLOY_PATH="$OPTARG"
+		;;
+		d) ARG_DEPLOY_DEV="$OPTARG"
+		;;
+		s) ARG_IMG_SIZE_GB="$OPTARG"
+		;;
+		u) ARG_UNPACK_DOM="$OPTARG"
+		;;
+		\?) echo "Invalid option -$OPTARG" >&2
+		exit 1
+		;;
+	esac
+done
+
+if [ -z "${ARG_DEPLOY_PATH}" ]; then
+	echo "No path to deploy directory passed with -p option"
+	usage
 fi
 
+if [ -z "${ARG_DEPLOY_DEV}" ]; then
+	echo "No device/file name passed with -d option"
+	usage
+fi
 
-make_image $@
+echo "Using deploy path: \"$ARG_DEPLOY_PATH\""
+echo "Using device     : \"$ARG_DEPLOY_DEV\""
+
+if [ ! -z "${ARG_UNPACK_DOM}" ]; then
+	unpack_domain $ARG_DEPLOY_PATH $ARG_DEPLOY_DEV $ARG_UNPACK_DOM
+else
+	make_image $ARG_DEPLOY_PATH $ARG_DEPLOY_DEV $ARG_IMG_SIZE_GB
+fi
 
