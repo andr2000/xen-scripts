@@ -705,8 +705,22 @@ _xen_armtf_make()
 				;;
 			esac
 		;;
+		m3n)
+			export ARMTF_SOC_SPECIFIC="LSI=M3N"
+			shift 1
+			case "$1" in
+				debug)
+					shift 1
+					export ARMTF_DEBUG="1"
+					echo "Using debug build for M3N"
+				;;
+				*)
+					echo "Using release build for M3N"
+				;;
+			esac
+		;;
 		*)
-			echo "Unknown board, use m3/h3 as argument to change"
+			echo "Unknown board, use m3/h3/m3n as argument to change"
 			return 1
 		;;
 	esac
@@ -906,7 +920,7 @@ xen_man()
 		xen_atf_make)
 			echo "xen_atf_make -- run make w/ parameters provided as args for ARM TF"
 			echo "  Arguments:"
-			echo "    [m3|h3]      - mandatory, platform to build for"
+			echo "    [m3|h3|m3n]  - mandatory, platform to build for"
 			echo "    [debug]      - optional, build in debug mode"
 			;;
 		xen_atf_install)
