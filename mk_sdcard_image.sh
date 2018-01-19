@@ -136,7 +136,7 @@ mkfs_one()
 	print_step "Making ext4 filesystem for $label"
 
 	sudo losetup -P $loop_base $img_output_file
-	sudo mkfs.ext4 -F $loop_dev -L $label
+	sudo mkfs.ext4 -O ^64bit -F $loop_dev -L $label
 	sudo losetup -d $loop_base
 }
 
