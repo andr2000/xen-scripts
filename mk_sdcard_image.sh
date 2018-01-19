@@ -46,7 +46,7 @@ inflate_image()
 		read -r -p "File $dev exists, remove it? [y/N]:" yesno
 		case "$yesno" in
 		[yY])
-			rm -f $dev || exit 1
+			sudo rm -f $dev || exit 1
 		;;
 		*)
 			echo "Reusing existing image file"
@@ -55,7 +55,7 @@ inflate_image()
 		esac
 	fi
 	if [[ $inflate == 1 ]] ; then
-		dd if=/dev/zero of=$dev bs=1M count=$(($size_gb*1024)) || exit 1
+		sudo dd if=/dev/zero of=$dev bs=1M count=$(($size_gb*1024)) || exit 1
 	fi
 }
 
