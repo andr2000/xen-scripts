@@ -634,8 +634,40 @@ _xen_pvr_make()
 				;;
 			esac
 		;;
+		m3n)
+			export PVR_FLAVOR="r8a77965_linux"
+			shift 1
+			case "$1" in
+				guest)
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						PVR_OUT="binary_${PVR_FLAVOR}_$1"
+					else
+						export PVR_FLAVOR="vzguest_linux"
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_GUESTDRV=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
+					echo "Using ${PVR_FLAVOR} to build guest"
+					shift 1
+				;;
+				host)
+					if [ "${PVRVERSION_BRANCHNAME}" == "1.9" ] ; then
+						export PVR_VIRT_OPS="PVRSRV_VZ_NUM_OSID=$PVR_NUM_OSID"
+						PVR_OUT="binary_${PVR_FLAVOR}_$1"
+					else
+						export PVR_VIRT_OPS="SUPPORT_PVRSRV_GPUVIRT=1 PVRSRV_GPUVIRT_NUM_OSID=$PVR_NUM_OSID"
+					fi
+					echo "Using ${PVR_FLAVOR} to build host"
+					shift 1
+				;;
+				"")
+				;;
+				*)
+					echo "Using ${PVR_FLAVOR} to build"
+				;;
+			esac
+		;;
 		*)
-			echo "Using r8a7796_linux, use m3/h3 argument to change"
+			echo "Using r8a7796_linux, use m3/h3/m3n argument to change"
 			export PVR_FLAVOR="r8a7796_linux"
 		;;
 	esac
@@ -914,7 +946,7 @@ xen_man()
 			echo "xen_pvr_make -- run make w/ parameters provided as args for PVR KM/UM"
 			echo "  Arguments:"
 			echo "    [dom0|domd|domu]  - domain to build for"
-			echo "    [m3|h3]      - platform to build for"
+			echo "    [m3|h3|m3n]      - platform to build for"
 			echo "    [guest|host] - optional, build with virtualization support"
 			;;
 		xen_atf_make)
