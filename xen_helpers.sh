@@ -854,7 +854,7 @@ xen_make()
 
 xen_install()
 {
-	sudo -E bash -c "cp -rfv dist/* ${XEN_DIR_ROOTFS_DOM0}"
+	sudo rsync -av --exclude='usr/lib*/*.a' --exclude='/usr/lib*/*.la' dist/ ${XEN_DIR_ROOTFS_DOM0}
 }
 
 xen_install_boot()
