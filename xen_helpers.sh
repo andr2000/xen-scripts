@@ -689,6 +689,7 @@ _xen_pvr_make()
 		PVR_MAKE_JOBS="-j${N_CPUS}"
 	fi
 	echo "Using ${PVR_MAKE_JOBS} to build"
+	echo "make ${SUFFIX} ${PVR_MAKE_JOBS} V=${MAKELEVEL} $@"
 	make ${SUFFIX} ${PVR_MAKE_JOBS} V=${MAKELEVEL} $@
 	export PVR_ARGS_LEFT=$@
 }
@@ -818,6 +819,9 @@ xen_config()
 		export SYSTEMD_STAT="enable"
 	fi
 
+	_xen_save_path
+
+	cd ${XEN_DIR}
 	./configure ${CONFIGURE_FLAGS} --prefix=/usr --exec_prefix=/usr --bindir=/usr/bin \
 		--sbindir=/usr/sbin --libexecdir=/usr/lib --datadir=/usr/share \
 		--sysconfdir=/etc --sharedstatedir=/com --localstatedir=/var \
@@ -831,6 +835,8 @@ xen_config()
 		--disable-qemu-traditional --enable-nls --disable-seabios --disable-sdl \
 		"--${SYSTEMD_STAT}-systemd" --enable-xsmpolicy --disable-docs --with-sysroot=${SDKTARGETSYSROOT} \
 		$@
+
+	_xen_restore_path
 }
 
 xen_menuconfig()
@@ -844,7 +850,7 @@ xen_compile()
 {
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=${XEN_EARLY_PRINTK} CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} install $@ || echo "$(tput setaf 1)ERRORS: build failed"
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C ${XEN_DIR} install $@ || echo "$(tput setaf 1)ERRORS: build failed"
 	if [ -f dist/boot/xen ]; then
 		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
@@ -854,7 +860,7 @@ xen_make()
 {
 	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=${XEN_EARLY_PRINTK} CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
-	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} $@
+	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C ${XEN_DIR} $@
 }
 
 
