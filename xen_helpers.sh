@@ -602,8 +602,13 @@ _xen_pvr_make()
 				;;
 			esac
 		;;
-		m3)
-			export PVR_FLAVOR="r8a7796_linux"
+		m3 | m3_android)
+			if [ $1 == "m3_android" ] ; then
+				export PVR_FLAVOR="r8a7796_android"
+				export PVR_BUILD_EXTRA_OPTS="-C build/linux/${PVR_FLAVOR}"
+			else
+				export PVR_FLAVOR="r8a7796_linux"
+			fi
 			shift 1
 			case "$1" in
 				guest)
@@ -673,7 +678,8 @@ _xen_pvr_make()
 	esac
 
 	local SUFFIX="KERNELDIR=$PVR_KERNEL_DIR DISCIMAGE=$PVR_DISCIMAGE PVR_BUILD_DIR=$PVR_FLAVOR \
-		      METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS LLVM_BUILD_DIR=${PVRLLVM_BUILD_DIR}"
+		      METAG_INST_ROOT=$XEN_DIR_PVR_META $PVR_VIRT_OPS LLVM_BUILD_DIR=${PVRLLVM_BUILD_DIR} \
+		      $PVR_BUILD_EXTRA_OPTS"
 	if [ ! -z "${PVR_OUT}" ] ; then
 		SUFFIX="$SUFFIX OUT=${PVR_OUT}"
 	fi
