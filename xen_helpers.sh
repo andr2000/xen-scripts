@@ -443,20 +443,17 @@ _xen_kernel_install()
 	shift 1
 
 	case "$kernel" in
-		domu)
-			# always install into Dom0's root fs so these are reachable by Dom0
-			if [ "$XEN_DIR_ROOTFS_DOM0" == "" ] ; then
-				echo "ERROR: Install path is not set: dom0 root fs"
-				return 1
-			fi
-			KERNEL_INSTALL_PATH="${XEN_DIR_ROOTFS_DOM0}/boot/domu"
-		;;
-		*)
+		dom0)
 			if [ "$XEN_DIR_TFTP" == "" ] ; then
 				echo "ERROR: Install path is not set: tftp"
 				return 1
 			fi
 			KERNEL_INSTALL_PATH="${XEN_DIR_TFTP}"
+		;;
+		*)
+			_xen_select_rootfs
+
+			KERNEL_INSTALL_PATH="${XEN_DIR_ROOTFS}/boot"
 		;;
 	esac
 
