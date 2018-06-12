@@ -226,13 +226,13 @@ unpack_dom_from_tar()
 	local dom_name=`ls $db_base_folder | grep $domain`
 	local dom_root=$db_base_folder/$dom_name
 	# take the latest - useful if making image from local build
-	local rootfs=`find $dom_root -name "*rootfs.tar.xz" | xargs ls -t | head -1`
+	local rootfs=`find $dom_root -name "*rootfs.tar.*" | xargs ls -t | head -1`
 
 	echo "Root filesystem is at $rootfs"
 
 	mount_part $loop_base $img_output_file $part $MOUNT_POINT
 
-	sudo tar --extract --xz --numeric-owner --preserve-permissions --preserve-order --totals \
+	sudo tar --extract --numeric-owner --preserve-permissions --preserve-order --totals \
 		--xattrs-include='*' --directory="${MOUNT_POINT}" --file=$rootfs
 
 	umount_part $loop_base $part
