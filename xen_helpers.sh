@@ -816,6 +816,25 @@ xen_config()
 		export SYSTEMD_STAT="enable"
 	fi
 
+	# Guess machine and disable shared page tables if needed
+	machine=`cat "${SDKTARGETSYSROOT}/etc/hostname" | sed 's/-xt-dom.//' | sed 's/.*-//'`
+	if [ $machine == "m3" ] ; then
+		echo "------------------- Disabling Renesas R-Car's IPMMU shared page tables support"
+		patch -p1 <<'EOF'
+--- a/xen/drivers/passthrough/Kconfig
++++ b/xen/drivers/passthrough/Kconfig
+@@ -5,7 +5,7 @@ config HAS_PASSTHROUGH
+ config RCAR_IPMMU_PGT_IS_SHARED
+ 	bool "Renesas R-Car's IPMMU shared page tables support"
+ 	depends on HAS_PASSTHROUGH && ARM_64
+-	default y
++	default n
+ 	help
+ 	  Enable this for Renesas R-Car's H3 v3.0 and M3N boards
+ 	  which have the IPMMU that does handle stage 2 translation
+EOF
+	fi
+
 	_xen_save_path
 
 	cd ${XEN_DIR}
