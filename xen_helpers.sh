@@ -16,6 +16,7 @@ _xen_load_config()
 
 	if [ -f "${config_file}" ] ; then
 		source "${config_file}"
+		export _XEN_CONFIG_PATH="${config_file}"
 	else
 		echo touch "${config_file}"
 	fi
