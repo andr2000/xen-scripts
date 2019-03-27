@@ -824,10 +824,10 @@ xen_config()
 		patch -p1 <<'EOF'
 --- a/xen/drivers/passthrough/Kconfig
 +++ b/xen/drivers/passthrough/Kconfig
-@@ -5,7 +5,7 @@ config HAS_PASSTHROUGH
+@@ -24,7 +24,7 @@ config RCAR_IPMMU
  config RCAR_IPMMU_PGT_IS_SHARED
  	bool "Renesas R-Car's IPMMU shared page tables support"
- 	depends on HAS_PASSTHROUGH && ARM_64
+ 	depends on HAS_PASSTHROUGH && ARM_64 && RCAR_IPMMU
 -	default y
 +	default n
  	help
