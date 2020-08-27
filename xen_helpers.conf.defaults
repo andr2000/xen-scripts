@@ -17,9 +17,6 @@
 # the actual number.
 #export XEN_BUILD_JOBS=MAX
 
-# R-Car early printk provider
-# export XEN_EARLY_PRINTK=salvator
-
 # Paths used by cda, updated by cda_save
 
 # export XEN_DIR=/home/a2k/projects/andr2000/xen-troops-xen

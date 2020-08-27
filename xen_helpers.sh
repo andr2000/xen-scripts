@@ -790,12 +790,7 @@ xen_armtf_install()
 xen_config()
 {
 	if [ "1" = "1" ]; then
-		if [ -z "${XEN_EARLY_PRINTK}" ] ; then
-			export XEN_EARLY_PRINTK=rcar3
-		fi
 		echo "XSM_ENABLE := y" > .config
-		echo "CONFIG_HAS_SCIF := y" >> .config
-		echo "CONFIG_EARLY_PRINTK := ${XEN_EARLY_PRINTK}" >> .config
 		echo "CONFIG_QEMU_XEN := n" >> .config
 		echo "CONFIG_DEBUG := y" >> .config
 	fi
@@ -865,7 +860,7 @@ xen_menuconfig()
 
 xen_compile()
 {
-	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=${XEN_EARLY_PRINTK} CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
+	local SUFFIX="CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C ${XEN_DIR} install $@ || echo "$(tput setaf 1)ERRORS: build failed"
 	if [ -f dist/boot/xen ]; then
@@ -875,7 +870,7 @@ xen_compile()
 
 xen_make()
 {
-	local SUFFIX="CONFIG_HAS_SCIF=y CONFIG_EARLY_PRINTK=${XEN_EARLY_PRINTK} CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
+	local SUFFIX="CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
 
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C ${XEN_DIR} $@
 }
