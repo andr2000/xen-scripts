@@ -17,6 +17,11 @@
 # the actual number.
 #export XEN_BUILD_JOBS=MAX
 
+# Xen load address:
+# R-Car : 0x78080000
+# ZynqMP: 0x6000000
+#export XEN_UBOOT_LOAD_ADDRESS=0x78080000
+
 # Paths used by cda, updated by cda_save
 
 # export XEN_DIR=/home/a2k/projects/andr2000/xen-troops-xen

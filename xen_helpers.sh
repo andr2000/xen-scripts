@@ -861,10 +861,13 @@ xen_menuconfig()
 xen_compile()
 {
 	local SUFFIX="CONFIG_QEMU_XEN=n debug=n DESTDIR=${PWD}/dist"
+	if [ -z "${XEN_UBOOT_LOAD_ADDRESS}" ] ; then
+		export XEN_UBOOT_LOAD_ADDRESS=0x78080000
+	fi
 
 	make ${SUFFIX} ${MAKE_JOBS} V=${MAKELEVEL} -C ${XEN_DIR} install $@ || echo "$(tput setaf 1)ERRORS: build failed"
 	if [ -f dist/boot/xen ]; then
-		mkimage -A arm64 -C none -T kernel -a 0x78080000 -e 0x78080000 -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
+		mkimage -A arm64 -C none -T kernel -a ${XEN_UBOOT_LOAD_ADDRESS} -e ${XEN_UBOOT_LOAD_ADDRESS} -n "XEN" -d dist/boot/xen dist/boot/xen-uImage
 	fi
 }
 
