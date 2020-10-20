@@ -5,7 +5,7 @@ usage()
     echo "uirfs.sh [action] [file] [folder]"
     echo "	action	pack|unpack	"
     echo "	file	initramfs or uInitramfs file for unpack, uInitramfs for pack"
-    echo "	folder	folder for initramfs pack/unpack (unpack will erase an existing folder)"
+    echo "	folder	folder for initramfs pack/unpack (unpack will erase the existing folder)"
 
     if [ -n "$1" ]; then
         echo "\n\t $1 \n"
@@ -21,7 +21,7 @@ unpack()
     fi
 
     if [ ! -d $2 ] && [ -e $2 ]; then
-        usage "$2 is an existing file, expecting folder"
+        usage "$2 is a file, but folder is expected"
     fi
 
     if [ -e $2 ] && [ -n "$(ls -A $2)" ] ; then
@@ -49,7 +49,7 @@ unpack()
     fi
 
     echo "\n\tuInitramfs unpacked to:"
-    echo "\t $1"    
+    echo "\t $1"
 }
 
 pack()
@@ -60,10 +60,10 @@ pack()
 
     if [ -e $1 ] ; then
         echo ""
-        read -r -p "Path $1 is existing, remove it? [y/N]:" yesno
+        read -r -p "Path $1 exists, remove it? [y/N]:" yesno
         case "$yesno" in
             [yY])
-                rm -f $1 || usage "Failed to remove $1, a folder?"
+                rm -f $1 || usage "Failed to remove $1, is it a folder?"
                 ;;
             *)
                 usage "Abort due to unhappines of a path removing"
